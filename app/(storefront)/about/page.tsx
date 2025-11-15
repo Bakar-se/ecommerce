@@ -74,7 +74,7 @@ const slideInRight = {
 const AboutPage = (props: Props) => {
   return (
     <main>
-      <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
+      <section className="relative min-h-[80vh] flex items-center justify-center overflow-hidden">
         {/* Background Image */}
         <Image
           src="/surgical-instruments-precision-dental-tools.jpg"

@@ -4,7 +4,6 @@ import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Checkbox } from '@/components/ui/checkbox';
 import { Slider } from '@/components/ui/slider';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
@@ -31,6 +30,7 @@ interface ProductsLayoutProps {
 
 export default function ProductsLayout({ children }: ProductsLayoutProps) {
   const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [categorySearch, setCategorySearch] = useState('');
   
   // Fetch categories and products from Sanity
   const { data: categoriesData, loading: categoriesLoading } = useCategories();
@@ -38,8 +38,13 @@ export default function ProductsLayout({ children }: ProductsLayoutProps) {
   
   // Calculate dynamic max price from products
   const allProducts = Array.isArray(productsData) ? productsData.map(transformProduct) : [];
-  const maxProductPrice = allProducts.length > 0 ? Math.max(...allProducts.map(p => p.price)) : 1000;
-  
+  const maxProductPrice =
+    allProducts.length > 0
+      ? Math.max(
+          ...allProducts
+            .map((p) => typeof p.price === "number" ? p.price : 0)
+        )
+      : 1000;
 
         // URL state management with nuqs
         const [searchQuery, setSearchQuery] = useQueryState('search', parseAsString.withDefault(''));
@@ -51,6 +56,18 @@ export default function ProductsLayout({ children }: ProductsLayoutProps) {
 
   // Transform categories for backward compatibility
   const transformedCategories = Array.isArray(categoriesData) ? categoriesData.map(transformCategory) : [];
+  
+  // Filter categories based on search
+  const filteredCategories = categorySearch
+    ? transformedCategories.filter((category: any) => {
+        const categoryName = getCategoryName(category).toLowerCase();
+        const matchesCategory = categoryName.includes(categorySearch.toLowerCase());
+        const matchesSubcategory = category.subcategories?.some((sub: any) =>
+          getSubcategoryName(sub).toLowerCase().includes(categorySearch.toLowerCase())
+        );
+        return matchesCategory || matchesSubcategory;
+      })
+    : transformedCategories;
   // Set max price to the highest product price when products are loaded and max price is 0
   useEffect(() => {
     if (!productsLoading && maxProductPrice > 0 && (maxPrice === 0 || maxPrice === 1000)) {
@@ -143,7 +160,7 @@ export default function ProductsLayout({ children }: ProductsLayoutProps) {
               </div>
 
               {/* Sort */}
-              <div className="space-y-2">
+              {/* <div className="space-y-2">
                 <Label htmlFor="sort">Sort by</Label>
                 <Select value={sortBy} onValueChange={setSortBy}>
                   <SelectTrigger>
@@ -157,7 +174,7 @@ export default function ProductsLayout({ children }: ProductsLayoutProps) {
                     ))}
                   </SelectContent>
                 </Select>
-              </div>
+              </div> */}
 
               {/* Price Range */}
               {/* <div className="space-y-4">
@@ -197,11 +214,17 @@ export default function ProductsLayout({ children }: ProductsLayoutProps) {
               {/* Categories */}
               <div className="space-y-3">
                 <Label>Categories</Label>
+                {/* Category Search */}
+                <Input
+                  placeholder="Search categories..."
+                  value={categorySearch}
+                  onChange={(e) => setCategorySearch(e.target.value)}
+                  className="text-sm"
+                />
                 {categoriesLoading ? (
                   <div className="space-y-2">
                     {[...Array(3)].map((_, i) => (
                       <div key={i} className="flex items-center space-x-2">
-                        <div className="h-4 w-4 bg-muted animate-pulse rounded" />
                         <div className="h-4 w-24 bg-muted animate-pulse rounded" />
                         <div className="h-4 w-8 bg-muted animate-pulse rounded" />
                       </div>
@@ -209,47 +232,56 @@ export default function ProductsLayout({ children }: ProductsLayoutProps) {
                   </div>
                 ) : (
                   <div className="space-y-2">
-                    {transformedCategories.map((category: any) => (
-                      <div key={category.id || category._id} className="space-y-2">
-                        <div className="flex items-center space-x-2">
-                          <Checkbox
-                            id={`category-${category.id || category._id}`}
-                            checked={
-                              categories.includes(category.id || category._id) ||
-                              categories.includes(category.slug?.current)
-                            }
-                            onCheckedChange={() => handleCategoryToggle(category.id || category._id, category.slug?.current)}
-                          />
-                          <Label htmlFor={`category-${category.id || category._id}`} className="text-sm font-medium">
-                            {getCategoryName(category)}
-                          </Label>
-                          <Badge variant="secondary" className="text-xs">
-                            {category.productCount}
-                          </Badge>
-                        </div>
-                        
-                        {/* Subcategories */}
-                        {categories.includes(category.id || category._id) && (
-                          <div className="ml-6 space-y-1">
-                            {category.subcategories?.map((sub: any) => (
-                              <div key={sub.id || sub._id} className="flex items-center space-x-2">
-                                <Checkbox
-                                  id={`subcategory-${sub.id || sub._id}`}
-                                  checked={subcategories.includes(sub.id || sub._id)}
-                                  onCheckedChange={() => handleSubcategoryToggle(sub.id || sub._id)}
-                                />
-                                <Label htmlFor={`subcategory-${sub.id || sub._id}`} className="text-xs text-muted-foreground">
-                                  {getSubcategoryName(sub)}
-                                </Label>
-                                <Badge variant="outline" className="text-xs">
-                                  {sub.productCount}
-                                </Badge>
-                              </div>
-                            ))}
+                    {filteredCategories.map((category: any) => {
+                      const isCategorySelected = categories.includes(category.id || category._id) || categories.includes(category.slug?.current);
+                      return (
+                        <div key={category.id || category._id} className="space-y-2">
+                          <div className="flex items-center space-x-2">
+                            <button
+                              type="button"
+                              onClick={() => handleCategoryToggle(category.id || category._id, category.slug?.current)}
+                              className={`text-sm font-medium transition-colors hover:opacity-80 ${
+                                isCategorySelected
+                                  ? 'text-primary font-semibold'
+                                  : 'text-foreground'
+                              }`}
+                            >
+                              {getCategoryName(category)}
+                            </button>
+                            <Badge variant="secondary" className="text-xs">
+                              {category.productCount}
+                            </Badge>
                           </div>
-                        )}
-                      </div>
-                    ))}
+                          
+                          {/* Subcategories */}
+                          {isCategorySelected && category.subcategories && (
+                            <div className="ml-6 space-y-1">
+                              {category.subcategories.map((sub: any) => {
+                                const isSubcategorySelected = subcategories.includes(sub.id || sub._id);
+                                return (
+                                  <div key={sub.id || sub._id} className="flex items-center space-x-2">
+                                    <button
+                                      type="button"
+                                      onClick={() => handleSubcategoryToggle(sub.id || sub._id)}
+                                      className={`text-xs transition-colors hover:opacity-80 ${
+                                        isSubcategorySelected
+                                          ? 'text-primary font-semibold'
+                                          : 'text-muted-foreground'
+                                      }`}
+                                    >
+                                      {getSubcategoryName(sub)}
+                                    </button>
+                                    <Badge variant="outline" className="text-xs">
+                                      {sub.productCount}
+                                    </Badge>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
                   </div>
                 )}
               </div>
@@ -355,11 +387,17 @@ export default function ProductsLayout({ children }: ProductsLayoutProps) {
                 {/* Categories */}
                 <div className="space-y-3">
                   <Label>Categories</Label>
+                  {/* Category Search */}
+                  <Input
+                    placeholder="Search categories..."
+                    value={categorySearch}
+                    onChange={(e) => setCategorySearch(e.target.value)}
+                    className="text-sm"
+                  />
                   {categoriesLoading ? (
                     <div className="space-y-2">
                       {[...Array(3)].map((_, i) => (
                         <div key={i} className="flex items-center space-x-2">
-                          <div className="h-4 w-4 bg-muted animate-pulse rounded" />
                           <div className="h-4 w-24 bg-muted animate-pulse rounded" />
                           <div className="h-4 w-8 bg-muted animate-pulse rounded" />
                         </div>
@@ -367,44 +405,56 @@ export default function ProductsLayout({ children }: ProductsLayoutProps) {
                     </div>
                   ) : (
                     <div className="space-y-2">
-                      {transformedCategories.map((category: any) => (
-                        <div key={category.id || category._id} className="space-y-2">
-                          <div className="flex items-center space-x-2">
-                            <Checkbox
-                              id={`mobile-category-${category.id || category._id}`}
-                              checked={categories.includes(category.id || category._id)}
-                              onCheckedChange={() => handleCategoryToggle(category.id || category._id)}
-                            />
-                            <Label htmlFor={`mobile-category-${category.id || category._id}`} className="text-sm font-medium">
-                              {getCategoryName(category)}
-                            </Label>
-                            <Badge variant="secondary" className="text-xs">
-                              {category.productCount}
-                            </Badge>
-                          </div>
-                          
-                          {/* Subcategories */}
-                          {categories.includes(category.id || category._id) && (
-                            <div className="ml-6 space-y-1">
-                              {category.subcategories?.map((sub: any) => (
-                                <div key={sub.id || sub._id} className="flex items-center space-x-2">
-                                  <Checkbox
-                                    id={`mobile-subcategory-${sub.id || sub._id}`}
-                                    checked={subcategories.includes(sub.id || sub._id)}
-                                    onCheckedChange={() => handleSubcategoryToggle(sub.id || sub._id)}
-                                  />
-                                  <Label htmlFor={`mobile-subcategory-${sub.id || sub._id}`} className="text-xs text-muted-foreground">
-                                    {getSubcategoryName(sub)}
-                                  </Label>
-                                  <Badge variant="outline" className="text-xs">
-                                    {sub.productCount}
-                                  </Badge>
-                                </div>
-                              ))}
+                      {filteredCategories.map((category: any) => {
+                        const isCategorySelected = categories.includes(category.id || category._id) || categories.includes(category.slug?.current);
+                        return (
+                          <div key={category.id || category._id} className="space-y-2">
+                            <div className="flex items-center space-x-2">
+                              <button
+                                type="button"
+                                onClick={() => handleCategoryToggle(category.id || category._id, category.slug?.current)}
+                                className={`text-sm font-medium transition-colors hover:opacity-80 ${
+                                  isCategorySelected
+                                    ? 'text-primary font-semibold'
+                                    : 'text-foreground'
+                                }`}
+                              >
+                                {getCategoryName(category)}
+                              </button>
+                              <Badge variant="secondary" className="text-xs">
+                                {category.productCount}
+                              </Badge>
                             </div>
-                          )}
-                        </div>
-                      ))}
+                            
+                            {/* Subcategories */}
+                            {isCategorySelected && category.subcategories && (
+                              <div className="ml-6 space-y-1">
+                                {category.subcategories.map((sub: any) => {
+                                  const isSubcategorySelected = subcategories.includes(sub.id || sub._id);
+                                  return (
+                                    <div key={sub.id || sub._id} className="flex items-center space-x-2">
+                                      <button
+                                        type="button"
+                                        onClick={() => handleSubcategoryToggle(sub.id || sub._id)}
+                                        className={`text-xs transition-colors hover:opacity-80 ${
+                                          isSubcategorySelected
+                                            ? 'text-primary font-semibold'
+                                            : 'text-muted-foreground'
+                                        }`}
+                                      >
+                                        {getSubcategoryName(sub)}
+                                      </button>
+                                      <Badge variant="outline" className="text-xs">
+                                        {sub.productCount}
+                                      </Badge>
+                                    </div>
+                                  );
+                                })}
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
                     </div>
                   )}
                 </div>

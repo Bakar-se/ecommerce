@@ -4,6 +4,7 @@ import { NuqsAdapter } from 'nuqs/adapters/next/app';
 import "./globals.css";
 import { CartProvider } from "@/context/CartContext";
 import WhatsAppButton from "@/components/layout/WhatsAppButton";
+import { ContactWidget } from "@/components/contact-widget";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -34,14 +35,14 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body
         className={`${dmSans.variable} min-h-screen bg-background font-sans antialiased`}
       >
         <CartProvider>
         <NuqsAdapter>
           {children}
-          <WhatsAppButton />
+          {/* <WhatsAppButton /> */}
         </NuqsAdapter>
         </CartProvider>
       </body>

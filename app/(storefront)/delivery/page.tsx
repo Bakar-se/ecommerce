@@ -1,8 +1,13 @@
 "use client"
-import { motion } from "framer-motion"
+import { AnimatePresence, motion } from "framer-motion"
 import AnimatedCounter from "@/components/animated-counter"
+import { useState } from "react"
+import Image from "next/image"
+import { ChevronLeft, ChevronRight } from "lucide-react"
 
 const DeliveryPage = () => {
+  const [direction, setDirection] = useState(0)
+  const [currentIndex, setCurrentIndex] = useState(0)
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
@@ -14,6 +19,23 @@ const DeliveryPage = () => {
     },
   }
 
+  const slideVariants = {
+    enter: (dir: number) => ({
+      x: dir > 0 ? 1000 : -1000,
+      opacity: 0,
+    }),
+    center: {
+      zIndex: 1,
+      x: 0,
+      opacity: 1,
+    },
+    exit: (dir: number) => ({
+      zIndex: 0,
+      x: dir > 0 ? -1000 : 1000,
+      opacity: 0,
+    }),
+  }
+
   const itemVariants = {
     hidden: { opacity: 0, y: 20 },
     visible: {
@@ -21,6 +43,68 @@ const DeliveryPage = () => {
       y: 0,
       transition: { duration: 0.6, ease: "easeOut" as const },
     },
+  }
+
+  const teamMembers = [
+    {
+      id: 1,
+      name: "M. Yaqoob",
+      role: "Chief Executive Officer (CEO)",
+      expertise: ["Business Leadership", "Strategy", "Operations Management"],
+      description:
+        "As the visionary behind Exsurion, M. Yaqoob leads with strategy, focus, and an unwavering commitment to innovation. His leadership philosophy is simple — empower people, build quality, and earn trust.",
+      image: "/team-member-ceo-professional-portrait.jpg",
+    },
+    {
+      id: 2,
+      name: "Dr. Faizan Whla",
+      role: "Clinical Advisor",
+      expertise: ["Oral Surgery", "Restorative Dentistry", "Product Evaluation"],
+      description:
+        "A dental expert committed to excellence, Dr. Faizan ensures that every Exsurion product meets the highest clinical standards. His deep understanding guides our innovations toward real-world precision.",
+      image: "/team-member-clinical-advisor-portrait.jpg",
+    },
+    {
+      id: 3,
+      name: "M. Shahzaib Yaqoob",
+      role: "Technical Head / AI-ML Engineer",
+      expertise: ["Artificial Intelligence", "Machine Learning", "Digital Systems"],
+      description:
+        "A passionate innovator, Shahzaib manages Exsurion's digital and technical infrastructure. He focuses on intelligent automation and data-driven solutions that enhance efficiency and accuracy.",
+      image: "/team-member-technical-head-portrait.jpg",
+    },
+    {
+      id: 4,
+      name: "Burhan Zulfiqar",
+      role: "Team Leader",
+      expertise: ["Team Management", "Project Coordination", "Operational Leadership"],
+      description:
+        "A results-oriented professional, Burhan ensures smooth team coordination across departments. His leadership fosters collaboration, efficiency, and excellence throughout every project.",
+      image: "/team-member-team-leader-portrait.jpg",
+    },
+    {
+      id: 5,
+      name: "Areeba Choudhary",
+      role: "Graphic Designer",
+      expertise: ["Graphic Design", "Brand Identity", "Product Visualization"],
+      description:
+        "A creative mind with an eye for precision, Areeba transforms ideas into visuals that define Exsurion's identity. Her work captures elegance, clarity, and trust — values at our core.",
+      image: "/team-member-designer-portrait.jpg",
+    },
+    {
+      id: 6,
+      name: "Aleeza Tariq",
+      role: "Client Support Specialist",
+      expertise: ["Client Relations", "Order Fulfillment", "Global Logistics"],
+      description:
+        "Our dedicated support specialist ensures seamless communication, timely delivery, and exceptional service. She upholds Exsurion's commitment to reliability and customer satisfaction globally.",
+      image: "/team-member-support-specialist-portrait.jpg",
+    },
+  ]
+
+  const paginate = (newDirection: number) => {
+    setDirection(newDirection)
+    setCurrentIndex((prev) => (prev + newDirection + teamMembers.length) % teamMembers.length)
   }
 
   return (
@@ -133,8 +217,9 @@ const DeliveryPage = () => {
     </section>
 
       {/* Shipping Options Section */}
-      <section className="py-20 md:py-32 px-4 md:px-8 bg-background">
-        <div className="max-w-7xl mx-auto">
+      {/* Infinite Carousel Section */}
+      <section className="py-20 md:py-28 px-4 md:px-8 bg-background">
+        <div className="max-w-6xl mx-auto">
           <motion.div
             className="text-center mb-16"
             initial={{ opacity: 0, y: 20 }}
@@ -143,130 +228,139 @@ const DeliveryPage = () => {
             viewport={{ once: true }}
           >
             <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-4">Shipping Options</h2>
-            <div className="w-20 h-1 bg-accent rounded-full mx-auto" />
+            <div className="w-20 h-1 bg-accent rounded-full mx-auto mb-4" />
+            <p className="text-lg text-foreground/60">
+              Driven by precision and passion, our team continues to innovate and refine.
+            </p>
           </motion.div>
 
-          {/* Domestic Shipping - Image Left */}
-          <motion.div
-            className="grid grid-cols-1 md:grid-cols-2 gap-0 items-stretch mb-8"
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            transition={{ duration: 0.6 }}
-            viewport={{ once: true }}
-          >
-            <div className="rounded-l-2xl overflow-hidden border border-accent/20 h-96 md:h-full min-h-96">
-              <img src="/domestic-shipping-truck-delivery-pakistan.jpg" alt="Domestic shipping" className="w-full h-full object-cover" />
-            </div>
+          {/* Carousel Container */}
+          <div className="relative h-[600px] md:h-[500px] flex items-center justify-center overflow-hidden rounded-2xl">
+            <AnimatePresence initial={false} custom={direction} mode="wait">
+              <motion.div
+                key={currentIndex}
+                custom={direction}
+                variants={slideVariants}
+                initial="enter"
+                animate="center"
+                exit="exit"
+                transition={{
+                  x: { type: "spring", stiffness: 300, damping: 30 },
+                  opacity: { duration: 0.5 },
+                }}
+                className="absolute w-full h-full"
+              >
+                <div className="grid md:grid-cols-2 gap-8 h-full items-center px-4 md:px-8">
+                  {/* Image Side */}
+                  <motion.div
+                    className="relative h-full rounded-2xl overflow-hidden border-2 border-accent/30 shadow-2xl"
+                    whileHover={{ scale: 1.02 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    <Image
+                      src={teamMembers[currentIndex].image || "/placeholder.svg"}
+                      alt={teamMembers[currentIndex].name}
+                      className="w-full h-full object-cover"
+                      width={1000}
+                      height={1000}
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
+                  </motion.div>
 
-            <motion.div
-              className="bg-card rounded-r-2xl p-8 md:p-12 border border-l-0 border-accent/20 flex flex-col justify-center h-96 md:h-full min-h-96"
-              whileHover={{ boxShadow: "0 20px 40px rgba(0,0,0,0.1)" }}
+                  {/* Content Side */}
+                  <motion.div
+                    className="space-y-6"
+                    initial={{ opacity: 0, x: 30 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 0.2, duration: 0.6 }}
+                  >
+                    <div>
+                      <motion.h3
+                        className="text-4xl font-bold text-foreground mb-2"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ delay: 0.3 }}
+                      >
+                        {teamMembers[currentIndex].name}
+                      </motion.h3>
+                      <motion.p
+                        className="text-xl font-semibold mb-4"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ delay: 0.4 }}
+                      >
+                        {teamMembers[currentIndex].role}
+                      </motion.p>
+                    </div>
+
+                    <motion.p
+                      className="text-lg text-foreground/70 leading-relaxed"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ delay: 0.5 }}
+                    >
+                      {teamMembers[currentIndex].description}
+                    </motion.p>
+
+                    {/* <motion.div
+                      className="flex flex-wrap gap-3"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ delay: 0.6 }}
+                    >
+                      {teamMembers[currentIndex].expertise.map((skill, idx) => (
+                        <motion.span
+                          key={skill}
+                          className="px-4 py-2 bg-white/10  rounded-full text-sm font-medium border border-accent/30"
+                          whileHover={{ scale: 1.05, backgroundColor: "var(--accent)" }}
+                          transition={{ duration: 0.2 }}
+                        >
+                          {skill}
+                        </motion.span>
+                      ))}
+                    </motion.div> */}
+                  </motion.div>
+                </div>
+              </motion.div>
+            </AnimatePresence>
+
+            {/* Navigation Buttons */}
+            <motion.button
+              onClick={() => paginate(-1)}
+              className="absolute left-4 md:left-8 top-1/2 -translate-y-1/2 z-20 p-3 rounded-full bg-accent/20 hover:bg-accent/40 text-foreground transition-all border border-accent/30"
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.95 }}
             >
-              <motion.h3
-                className="text-3xl font-bold text-foreground mb-4"
-                initial={{ opacity: 0 }}
-                whileInView={{ opacity: 1 }}
-                transition={{ delay: 0.2 }}
-                viewport={{ once: true }}
-              >
-                Domestic Shipping
-              </motion.h3>
-              <p className="text-foreground/70 mb-6">
-                For deliveries within Pakistan, we rely on trusted courier partners to provide fast and reliable
-                service.
-              </p>
-              <motion.ul
-                className="space-y-3 text-foreground/70"
-                variants={containerVariants}
-                initial="hidden"
-                whileInView="visible"
-                viewport={{ once: true }}
-              >
-                <motion.li className="flex gap-3" variants={itemVariants} whileHover={{ x: 5 }}>
-                  <span className="text-accent font-bold text-lg">→</span>
-                  <span>
-                    <strong>Standard Delivery:</strong> 2–5 business days
-                  </span>
-                </motion.li>
-                <motion.li className="flex gap-3" variants={itemVariants} whileHover={{ x: 5 }}>
-                  <span className="text-accent font-bold text-lg">→</span>
-                  <span>Metropolitan areas receive shipments sooner</span>
-                </motion.li>
-                <motion.li className="flex gap-3" variants={itemVariants} whileHover={{ x: 5 }}>
-                  <span className="text-accent font-bold text-lg">→</span>
-                  <span>Remote locations may require slightly longer</span>
-                </motion.li>
-                <motion.li className="flex gap-3" variants={itemVariants} whileHover={{ x: 5 }}>
-                  <span className="text-accent font-bold text-lg">→</span>
-                  <span>Email or SMS notifications upon dispatch</span>
-                </motion.li>
-              </motion.ul>
-            </motion.div>
-          </motion.div>
+              <ChevronLeft className="w-6 h-6" />
+            </motion.button>
 
-          {/* International Shipping - Image Right */}
-          <motion.div
-            className="grid grid-cols-1 md:grid-cols-2 gap-0 items-stretch"
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            transition={{ duration: 0.6 }}
-            viewport={{ once: true }}
-          >
-            <motion.div
-              className="bg-card rounded-l-2xl p-8 md:p-12 border border-accent/20 flex flex-col justify-center h-96 md:h-full min-h-96 order-2 md:order-1"
-              whileHover={{ boxShadow: "0 20px 40px rgba(0,0,0,0.1)" }}
+            <motion.button
+              onClick={() => paginate(1)}
+              className="absolute right-4 md:right-8 top-1/2 -translate-y-1/2 z-20 p-3 rounded-full bg-accent/20 hover:bg-accent/40 text-foreground transition-all border border-accent/30"
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.95 }}
             >
-              <motion.h3
-                className="text-3xl font-bold text-foreground mb-4"
-                initial={{ opacity: 0 }}
-                whileInView={{ opacity: 1 }}
-                transition={{ delay: 0.2 }}
-                viewport={{ once: true }}
-              >
-                International Shipping
-              </motion.h3>
-              <p className="text-foreground/70 mb-6">
-                We proudly ship worldwide, serving clients across Asia, Europe, the Middle East, North America, and
-                beyond.
-              </p>
-              <motion.ul
-                className="space-y-3 text-foreground/70"
-                variants={containerVariants}
-                initial="hidden"
-                whileInView="visible"
-                viewport={{ once: true }}
-              >
-                <motion.li className="flex gap-3" variants={itemVariants} whileHover={{ x: 5 }}>
-                  <span className="text-accent font-bold text-lg">→</span>
-                  <span>
-                    <strong>Standard Delivery:</strong> 7–14 business days
-                  </span>
-                </motion.li>
-                <motion.li className="flex gap-3" variants={itemVariants} whileHover={{ x: 5 }}>
-                  <span className="text-accent font-bold text-lg">→</span>
-                  <span>
-                    <strong>Express Delivery:</strong> 3–7 business days
-                  </span>
-                </motion.li>
-                <motion.li className="flex gap-3" variants={itemVariants} whileHover={{ x: 5 }}>
-                  <span className="text-accent font-bold text-lg">→</span>
-                  <span>Partners: DHL, FedEx, and other global couriers</span>
-                </motion.li>
-                <motion.li className="flex gap-3" variants={itemVariants} whileHover={{ x: 5 }}>
-                  <span className="text-accent font-bold text-lg">→</span>
-                  <span>Timelines may vary due to customs or external factors</span>
-                </motion.li>
-              </motion.ul>
-            </motion.div>
+              <ChevronRight className="w-6 h-6" />
+            </motion.button>
 
-            <div className="rounded-r-2xl overflow-hidden border border-accent/20 h-96 md:h-full min-h-96 order-1 md:order-2">
-              <img
-                src="/international-shipping-airplane-cargo-global-logis.jpg"
-                alt="International shipping"
-                className="w-full h-full object-cover"
-              />
+            {/* Carousel Indicators */}
+            <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-2 z-20">
+              {teamMembers.map((_, idx) => (
+                <motion.button
+                  key={idx}
+                  onClick={() => {
+                    setDirection(idx > currentIndex ? 1 : -1)
+                    setCurrentIndex(idx)
+                  }}
+                  className={`h-2 rounded-full transition-all ${
+                    idx === currentIndex ? "bg-white w-8" : "bg-white/40 w-2"
+                  }`}
+                  whileHover={{ scale: 1.2 }}
+                  whileTap={{ scale: 0.9 }}
+                />
+              ))}
             </div>
-          </motion.div>
+          </div>
         </div>
       </section>
 
@@ -541,123 +635,7 @@ const DeliveryPage = () => {
       </section>
 
       {/* After Delivery Section */}
-      <section className="py-20 md:py-32 px-4 md:px-8 bg-background">
-        <div className="max-w-5xl mx-auto">
-          <motion.div
-            className="text-center mb-16"
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            viewport={{ once: true }}
-          >
-            <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-4">After Delivery</h2>
-            <div className="w-20 h-1 bg-accent rounded-full mx-auto" />
-          </motion.div>
-
-          <motion.div
-            className="bg-card rounded-2xl p-8 md:p-12 border border-border/50"
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            viewport={{ once: true }}
-            whileHover={{ boxShadow: "0 20px 40px rgba(0,0,0,0.1)" }}
-          >
-            <div className="rounded-2xl overflow-hidden border border-accent/20 shadow-lg mb-8">
-              <img
-                src="/customer-satisfaction-product-inspection-quality-a.jpg"
-                alt="After delivery support"
-                className="w-full h-[400px]  object-cover"
-              />
-            </div>
-
-            <p className="text-lg text-foreground/70 mb-8 text-balance">
-              We encourage customers to inspect products immediately upon delivery. Any missing or damaged items should
-              be reported within 48 hours.
-            </p>
-
-            <motion.div
-              className="grid md:grid-cols-3 gap-6 mb-8"
-              variants={containerVariants}
-              initial="hidden"
-              whileInView="visible"
-              viewport={{ once: true }}
-            >
-              {[
-                { num: 1, title: "Inspect Products", desc: "Check items immediately upon delivery" },
-                { num: 2, title: "Report Issues", desc: "Contact us within 48 hours if needed" },
-                { num: 3, title: "Get Support", desc: "Replacement or repair for defects" },
-              ].map((step) => (
-                <motion.div key={step.num} className="text-center" variants={itemVariants} whileHover={{ scale: 1.05 }}>
-                  <motion.div
-                    className="text-4xl font-bold  mb-3 inline-flex items-center justify-center w-16 h-16 rounded-full bg-accent/10 mx-auto border border-accent/20"
-                    whileHover={{ rotate: 360 }}
-                    transition={{ duration: 0.6 }}
-                  >
-                    {step.num}
-                  </motion.div>
-                  <h3 className="font-bold text-foreground mb-2">{step.title}</h3>
-                  <p className="text-sm text-foreground/70">{step.desc}</p>
-                </motion.div>
-              ))}
-            </motion.div>
-
-            <motion.div
-              className="border-t border-border/50 pt-8"
-              initial={{ opacity: 0 }}
-              whileInView={{ opacity: 1 }}
-              transition={{ delay: 0.3 }}
-              viewport={{ once: true }}
-            >
-              <h3 className="text-2xl font-bold text-foreground mb-6">Our Support Services</h3>
-              <motion.ul
-                className="space-y-3 text-foreground/70"
-                variants={containerVariants}
-                initial="hidden"
-                whileInView="visible"
-                viewport={{ once: true }}
-              >
-                <motion.li className="flex gap-3" variants={itemVariants} whileHover={{ x: 5 }}>
-                  <span className="text-accent font-bold">✓</span>
-                  <span>Replacement or repair for manufacturing defects</span>
-                </motion.li>
-                <motion.li className="flex gap-3" variants={itemVariants} whileHover={{ x: 5 }}>
-                  <span className="text-accent font-bold">✓</span>
-                  <span>Replacement or repair for shipping damage</span>
-                </motion.li>
-                <motion.li className="flex gap-3" variants={itemVariants} whileHover={{ x: 5 }}>
-                  <span className="text-accent font-bold">✓</span>
-                  <span>Guidance on instrument care and maintenance</span>
-                </motion.li>
-                <motion.li className="flex gap-3" variants={itemVariants} whileHover={{ x: 5 }}>
-                  <span className="text-accent font-bold">✓</span>
-                  <span>Support for returns, exchanges, or additional orders</span>
-                </motion.li>
-              </motion.ul>
-            </motion.div>
-
-            <motion.div
-              className="mt-8 p-8 bg-gradient-to-r from-accent/10 to-accent/5 rounded-2xl border border-accent/20"
-              initial={{ opacity: 0, scale: 0.95 }}
-              whileInView={{ opacity: 1, scale: 1 }}
-              transition={{ delay: 0.4 }}
-              viewport={{ once: true }}
-              whileHover={{ boxShadow: "0 10px 30px rgba(0,0,0,0.1)" }}
-            >
-              <p className="text-foreground font-semibold text-center text-lg">
-                At Exsurion Instruments, we continue to uphold our promise of{" "}
-                <motion.span
-                  className="text-accent"
-                  animate={{ opacity: [1, 0.7, 1] }}
-                  transition={{ duration: 2, repeat: Number.POSITIVE_INFINITY }}
-                >
-                  Delivering Excellence, Wherever You Are
-                </motion.span>{" "}
-                with every shipment — ensuring reliability, precision, and care at every step.
-              </p>
-            </motion.div>
-          </motion.div>
-        </div>
-      </section>
+      
     </main>
   )
 }

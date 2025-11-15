@@ -15,8 +15,14 @@ export function transformProduct(sanityProduct: any): Product {
     subCategory: sanityProduct.subCategory || null,
     inStock: (sanityProduct.stock || 0) > 0,
     stockCount: sanityProduct.stock || 0,
-    // Add default values for missing fields
-
+    // Include new product fields
+    sku: sanityProduct.sku,
+    productCode: sanityProduct.productCode,
+    variant: sanityProduct.variant,
+    colors: sanityProduct.colors || [],
+    materials: sanityProduct.materials || [],
+    tipShapes: sanityProduct.tipShapes || [],
+    code: sanityProduct.code,
   };
 }
 
@@ -77,7 +83,14 @@ export function getProductImages(product: Product): string[] {
 
 // Get category display name (handles both formats)
 export function getCategoryName(category: Category): string {
-  return category.name || category.title || '';
+  if (!category) return '';
+  const name = category.name || category.title;
+  if (typeof name === 'string') return name;
+  if (typeof name === 'object' && name !== null) {
+    // If name is an object, try to extract a string value
+    return (name as any).title || (name as any).name || '';
+  }
+  return '';
 }
 
 // Get product images (handles both formats)
@@ -95,18 +108,46 @@ export function getCategoryImages(category: Category): SanityImage | null {
 
 // Get subcategory display name (handles both formats)
 export function getSubcategoryName(subcategory: Subcategory): string {
-  return subcategory.name || subcategory.title || '';
+  if (!subcategory) return '';
+  const name = subcategory.name || subcategory.title;
+  if (typeof name === 'string') return name;
+  if (typeof name === 'object' && name !== null) {
+    // If name is an object, try to extract a string value
+    return (name as any).title || (name as any).name || '';
+  }
+  return '';
 }
 
-// Check if product is in stock
-export function isProductInStock(product: Product): boolean {
-  return product.inStock || (product.stockCount || 0) > 0 || (product.stock || 0) > 0;
+// Get brand display name (handles both object and string formats) - Legacy support
+export function getBrandName(product: Product): string {
+  if (!product.brand) return '';
+  if (typeof product.brand === 'string') return product.brand;
+  if (typeof product.brand === 'object' && product.brand !== null) {
+    return (product.brand as any).name || '';
+  }
+  return '';
 }
 
-// Get product stock count
-export function getProductStockCount(product: Product): number {
-  return product.stockCount || product.stock || 0;
+// Get material display names (handles array of objects and strings)
+export function getMaterialNames(product: Product): string[] {
+  if (!product.materials || !Array.isArray(product.materials)) return [];
+  return product.materials.map(material => {
+    if (typeof material === 'string') return material;
+    if (typeof material === 'object' && material !== null) {
+      return (material as any).name || '';
+    }
+    return '';
+  }).filter(Boolean);
 }
+
+// Get first material name (for backward compatibility)
+export function getMaterialName(product: Product): string {
+  const materials = getMaterialNames(product);
+  return materials[0] || '';
+}
+
+
+
 
 // Generate product URL
 export function getProductUrl(product: Product): string {

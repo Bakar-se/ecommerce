@@ -8,7 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Product } from '@/types';
 import { motion } from 'framer-motion';
 import { useCart } from '@/context/CartContext';
-import { getProductName, getProductDescription, getProductImages, isProductInStock, getProductStockCount, getProductUrl } from '@/lib/sanity/utils';
+import { getProductName, getProductDescription, getProductImages, getProductUrl } from '@/lib/sanity/utils';
 
 interface ProductCardProps {
   product: Product;
@@ -28,13 +28,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, priority = false }) 
   const productName = getProductName(product);
   const productDescription = getProductDescription(product);
   const productImages = getProductImages(product);
-  const inStock = isProductInStock(product);
-  const stockCount = getProductStockCount(product);
   const productUrl = getProductUrl(product);
-
-  const discountPercentage = product.originalPrice 
-    ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)
-    : 0;
   return (
     <motion.div
       whileHover={{ y: -4 }}
@@ -52,19 +46,6 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, priority = false }) 
               loading={priority ? 'eager' : 'lazy'}
             />
             
-            {/* Badges */}
-            <div className="absolute top-3 left-3 flex flex-col gap-2">
-              {product.isOnSale && (
-                <Badge className="sale-badge">
-                  -{discountPercentage}%
-                </Badge>
-              )}
-              {!inStock && (
-                <Badge variant="secondary" className="bg-muted text-muted-foreground">
-                  Out of Stock
-                </Badge>
-              )}
-            </div>
 
             {/* Heart icon */}
             {/* <Button
@@ -80,15 +61,13 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, priority = false }) 
             </Button> */}
 
             {/* Quick add to cart */}
-            {inStock && (
-              <Button
-                onClick={handleAddToCart}
-                className="absolute bottom-3 left-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity duration-200 bg-gradient-to-r from-stone-100 to-orange-200 text-gray-800 hover:from-stone-200 hover:to-orange-300"
-              >
-                <ShoppingCart className="w-4 h-4 mr-2" />
-                Add to Cart
-              </Button>
-            )}
+            <Button
+              onClick={handleAddToCart}
+              className="absolute bottom-3 left-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity duration-200 bg-gradient-to-r from-stone-100 to-orange-200 text-gray-800 hover:from-stone-200 hover:to-orange-300"
+            >
+              <ShoppingCart className="w-4 h-4 mr-2" />
+              Add to Cart
+            </Button>
           </div>
 
           {/* Content */}
@@ -121,28 +100,6 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, priority = false }) 
               </span>
             </div> */}
 
-            {/* Price */}
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mt-auto">
-              <div className="flex items-center space-x-2">
-                <span className="text-sm sm:text-base font-semibold">
-                  ${product.price.toFixed(2)}
-                </span>
-                {product.originalPrice && (
-                  <span className="text-xs sm:text-sm text-muted-foreground line-through">
-                    ${product.originalPrice.toFixed(2)}
-                  </span>
-                )}
-              </div>
-              
-              {/* Stock indicator */}
-              <span className={`text-xs font-medium ${
-                stockCount > 10 ? 'text-green-600' :
-                stockCount > 0 ? 'text-orange-500' : 'text-red-600'
-              }`}>
-                {stockCount > 10 ? 'In Stock' :
-                 stockCount > 0 ? `Only ${stockCount} left` : 'Out of Stock'}
-              </span>
-            </div>
           </div>
         </div>
       </Link>

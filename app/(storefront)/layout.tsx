@@ -5,6 +5,7 @@ import "../globals.css";
 import Footer from "@/components/layout/Footer";
 import { ThemeProvider } from "@/components/theme-provider";
 import CategoriesNavigation from "@/components/navigation/CategoriesNavigation";
+import { ContactWidget } from "@/components/contact-widget";
 
 export const metadata: Metadata = {
   title: "Exsurion",
@@ -32,6 +33,8 @@ export default function StorefrontLayout({
         <CategoriesNavigation />
         <main className="flex-1">
           {children}
+          <ContactWidget />
+
         </main>
         <Footer />
         <Toaster richColors position="top-center" />

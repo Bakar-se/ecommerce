@@ -3,7 +3,7 @@ import sendEmail from '@/lib/sendEmail';
 
 export async function POST(request: NextRequest) {
   try {
-    const { fullName, email, message } = await request.json();
+    const { fullName, email, message, phone } = await request.json();
 
     // Validate required fields
     if (!fullName || !email || !message) {
@@ -29,6 +29,7 @@ New contact form submission:
 
 Name: ${fullName}
 Email: ${email}
+${phone ? `Phone: ${phone}` : ''}
 Message: ${message}
 
 ---
@@ -42,6 +43,7 @@ This email was sent from the contact form on your website.
         <div style="background-color: #f8f9fa; padding: 20px; border-radius: 5px; margin: 20px 0;">
           <p><strong>Name:</strong> ${fullName}</p>
           <p><strong>Email:</strong> <a href="mailto:${email}">${email}</a></p>
+          ${phone ? `<p><strong>Phone:</strong> <a href="tel:${phone}">${phone}</a></p>` : ''}
           <p><strong>Message:</strong></p>
           <p style="background-color: white; padding: 15px; border-left: 4px solid #007bff; margin-top: 10px;">
             ${message.replace(/\n/g, '<br>')}
@@ -60,6 +62,7 @@ Dear ${fullName},
 
 Thank you for reaching out to us! We have received your message and will get back to you as soon as possible.
 
+${phone ? `Phone: ${phone}\n` : ''}
 Your message:
 ${message}
 
@@ -88,6 +91,7 @@ The Team
           <p style="margin: 0; color: #666; line-height: 1.6;">
             ${message.replace(/\n/g, '<br>')}
           </p>
+          ${phone ? `<p style="margin: 15px 0 0 0; color: #666; line-height: 1.6;"><strong>Phone:</strong> ${phone}</p>` : ''}
         </div>
 
         <p style="font-size: 16px; line-height: 1.6; color: #333;">

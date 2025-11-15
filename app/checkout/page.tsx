@@ -8,17 +8,17 @@ import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Shield, CreditCard, Truck, ArrowLeft } from 'lucide-react';
+import { Shield, Truck, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { toast } from 'sonner';
-import { getProductName } from '@/lib/sanity/utils';
-import { useStoreSettings } from '@/lib/sanity/hooks';
-import { StoreSettings, Order } from '@/types';
+import Image from 'next/image';
+import { getProductName, getProductImages } from '@/lib/sanity/utils';
 
 const CheckoutPage = () => {
-  const { items, total, clearCart } = useCart();
-  const { data: storeSettings, loading: settingsLoading } = useStoreSettings();
+  const { items, clearCart } = useCart();
+  const router = useRouter();
   const [isProcessing, setIsProcessing] = useState(false);
   const [formData, setFormData] = useState({
     email: '',
@@ -31,18 +31,6 @@ const CheckoutPage = () => {
     phone: ''
   });
 
-  // Calculate shipping and tax based on store settings
-  const shippingCharges = storeSettings?.shippingCharges || null;
-  const taxSettings = storeSettings?.taxSettings || null;
-  
-  const shipping = shippingCharges 
-    ? (total >= shippingCharges.freeShippingThreshold ? 0 : shippingCharges.fixedCharge)
-    : (total > 500 ? 0 : 25); // fallback values
-  
-  const taxPercentage = taxSettings?.taxPercentage || 8; // fallback to 8%
-  const tax = total * (taxPercentage / 100);
-  const finalTotal = total + shipping + tax;
-
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
@@ -51,25 +39,71 @@ const CheckoutPage = () => {
     e.preventDefault();
     setIsProcessing(true);
     try {
-      // Prepare order data
-      const orderItems = items.map((item) => {
+      // Prepare quote request data
+      const quoteItems = items.map((item) => {
         const productId = item.product._id || item.product.id;
         if (!productId) {
           throw new Error(`Product ID not found for item: ${getProductName(item.product)}`);
         }
+
+        const sku = item.product.sku || '';
+        const productCode = item.product.productCode || '';
+        
+        // Get selected color name
+        let colorName: string | null = null;
+        if (item.selectedColor && item.product.colors) {
+          const selectedColorObj = item.product.colors.find((c: any) => 
+            (typeof c === 'object' && c?._id === item.selectedColor) || 
+            (typeof c === 'string' && c === item.selectedColor)
+          );
+          if (selectedColorObj) {
+            colorName = typeof selectedColorObj === 'object' && selectedColorObj?.name 
+              ? selectedColorObj.name 
+              : item.selectedColor;
+          }
+        }
+        
+        // Get selected material name
+        let materialName: string | null = null;
+        if (item.selectedMaterial && item.product.materials) {
+          const selectedMaterialObj = item.product.materials.find((m: any) => 
+            (typeof m === 'object' && m?._id === item.selectedMaterial) || 
+            (typeof m === 'string' && m === item.selectedMaterial)
+          );
+          if (selectedMaterialObj) {
+            materialName = typeof selectedMaterialObj === 'object' && selectedMaterialObj?.name 
+              ? selectedMaterialObj.name 
+              : item.selectedMaterial;
+          }
+        }
+
+        // Get selected tip shape name
+        let tipShapeName: string | null = null;
+        if (item.selectedTipShape && item.product.tipShapes) {
+          const selectedTipShapeObj = item.product.tipShapes.find((t: any) => 
+            (typeof t === 'object' && t?._id === item.selectedTipShape) || 
+            (typeof t === 'string' && t === item.selectedTipShape)
+          );
+          if (selectedTipShapeObj) {
+            tipShapeName = typeof selectedTipShapeObj === 'object' && selectedTipShapeObj?.name 
+              ? selectedTipShapeObj.name 
+              : item.selectedTipShape;
+          }
+        }
         
         return {
-          product: {
-            _ref: productId,
-            _type: 'reference' as const,
-          },
+          productId,
+          productName: getProductName(item.product),
+          sku,
+          ...(productCode ? { productCode } : {}),
           quantity: item.quantity,
-          price: item.product.price,
-          total: item.product.price * item.quantity,
+          ...(colorName ? { color: colorName } : {}),
+          ...(materialName ? { material: materialName } : {}),
+          ...(tipShapeName ? { tipShape: tipShapeName } : {}),
         };
       });
 
-      const orderData: Omit<Order, '_id' | 'orderNumber'> = {
+      const quoteData = {
         customer: {
           email: formData.email,
           firstName: formData.firstName,
@@ -82,51 +116,31 @@ const CheckoutPage = () => {
           state: formData.state,
           zipCode: formData.zipCode,
         },
-        items: orderItems,
-        paymentMethod: 'COD',
-        status: 'Pending',
-        pricing: {
-          subtotal: total,
-          shipping: shipping,
-          tax: tax,
-          total: finalTotal,
-        },
-        notes: '',
-        orderDate: new Date().toISOString(),
+        items: quoteItems,
       };
-      // Process the order via API route
-      const response = await fetch('/api/orders', {
+
+      // Send quote request via API route
+      const response = await fetch('/api/quote', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(orderData),
+        body: JSON.stringify(quoteData),
       });
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to process order');
+        throw new Error(errorData.error || 'Failed to submit quote request');
       }
 
-      const createdOrder = await response.json();
-      
-      // Check if this is a simulated order
-      const isSimulated = createdOrder._id?.startsWith('simulated-');
-      
-      if (isSimulated) {
-        toast.success(`Order simulated successfully! Order #${createdOrder.orderNumber} (Simulated - Check SANITY_SETUP_GUIDE.md for real order setup)`);
-      } else {
-        toast.success(`Order placed successfully! Order #${createdOrder.orderNumber}`);
-      }
-      
       clearCart();
       
-      // In a real app, redirect to order confirmation page
-      // router.push(`/order-confirmation/${createdOrder._id}`);
+      // Redirect to thank you page
+      router.push('/checkout/thank-you');
       
     } catch (error) {
-      console.error('Order processing error:', error);
-      toast.error(error instanceof Error ? error.message : 'Failed to place order. Please try again.');
+      console.error('Quote request error:', error);
+      toast.error(error instanceof Error ? error.message : 'Failed to submit quote request. Please try again.');
     } finally {
       setIsProcessing(false);
     }
@@ -151,17 +165,6 @@ const CheckoutPage = () => {
     );
   }
 
-  if (settingsLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
-          <p className="text-muted-foreground">Loading checkout...</p>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="min-h-screen bg-muted/20">
       <div className="container-custom py-8">
@@ -171,9 +174,9 @@ const CheckoutPage = () => {
           transition={{ duration: 0.6 }}
           className="mb-8"
         >
-          <h1 className="text-3xl font-bold mb-2">Checkout</h1>
+          <h1 className="text-3xl font-bold mb-2">Request a Quote</h1>
           <p className="text-muted-foreground">
-            Complete your order for professional surgical instruments
+            Fill in your information to receive a quote for professional surgical instruments
           </p>
         </motion.div>
 
@@ -288,52 +291,12 @@ const CheckoutPage = () => {
                 </CardContent>
               </Card>
 
-              {/* Delivery Options */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center space-x-2">
-                    <Truck className="w-5 h-5" />
-                    <span>Delivery & Payment</span>
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="bg-muted/20 border border-border rounded-lg p-4">
-                    <div className="flex items-center space-x-3">
-                      <div className="w-4 h-4 bg-primary rounded-full flex items-center justify-center">
-                        <div className="w-2 h-2 bg-primary-foreground rounded-full"></div>
-                      </div>
-                      <div>
-                        <h4 className="font-medium">Cash on Delivery</h4>
-                        <p className="text-sm text-muted-foreground">
-                          Pay when your order is delivered to your doorstep
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div className="space-y-3 text-sm">
-                    <div className="flex items-center space-x-2 text-muted-foreground">
-                      <span>✓</span>
-                      <span>No advance payment required</span>
-                    </div>
-                    <div className="flex items-center space-x-2 text-muted-foreground">
-                      <span>✓</span>
-                      <span>Inspect products before payment</span>
-                    </div>
-                    <div className="flex items-center space-x-2 text-muted-foreground">
-                      <span>✓</span>
-                      <span>Cash or card payment at delivery</span>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
               <Button
                 type="submit"
                 className="w-full py-3 text-lg"
                 disabled={isProcessing}
               >
-                {isProcessing ? 'Processing...' : `Place Order - $${finalTotal.toFixed(2)}`}
+                {isProcessing ? 'Submitting...' : 'Get Quote'}
               </Button>
             </motion.form>
           </div>
@@ -347,53 +310,110 @@ const CheckoutPage = () => {
           >
             <Card className="sticky top-8">
               <CardHeader>
-                <CardTitle>Order Summary</CardTitle>
+                <CardTitle>Quote Request Summary</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 {/* Items */}
                 <div className="space-y-3">
-                  {items.map((item) => (
-                    <div key={item.product.id || item.product._id} className="flex justify-between items-start">
-                      <div className="flex-1">
-                        <h4 className="text-sm font-medium line-clamp-2">
-                          {getProductName(item.product)}
-                        </h4>
-                        <p className="text-xs text-muted-foreground">
-                          Qty: {item.quantity}
-                        </p>
+                  {items.map((item) => {
+                    // Get selected color name and value
+                    let colorName: string | null = null;
+                    let colorValue: string | null = null;
+                    if (item.selectedColor && item.product.colors) {
+                      const selectedColorObj = item.product.colors.find((c: any) => 
+                        (typeof c === 'object' && c?._id === item.selectedColor) || 
+                        (typeof c === 'string' && c === item.selectedColor)
+                      );
+                      if (selectedColorObj) {
+                        colorName = typeof selectedColorObj === 'object' && selectedColorObj?.name 
+                          ? selectedColorObj.name 
+                          : item.selectedColor;
+                        colorValue = typeof selectedColorObj === 'object' && selectedColorObj?.value 
+                          ? selectedColorObj.value 
+                          : null;
+                      }
+                    }
+                    
+                    // Get selected material name
+                    let materialName: string | null = null;
+                    if (item.selectedMaterial && item.product.materials) {
+                      const selectedMaterialObj = item.product.materials.find((m: any) => 
+                        (typeof m === 'object' && m?._id === item.selectedMaterial) || 
+                        (typeof m === 'string' && m === item.selectedMaterial)
+                      );
+                      if (selectedMaterialObj) {
+                        materialName = typeof selectedMaterialObj === 'object' && selectedMaterialObj?.name 
+                          ? selectedMaterialObj.name 
+                          : item.selectedMaterial;
+                      }
+                    }
+
+                    // Get selected tip shape name
+                    let tipShapeName: string | null = null;
+                    if (item.selectedTipShape && item.product.tipShapes) {
+                      const selectedTipShapeObj = item.product.tipShapes.find((t: any) => 
+                        (typeof t === 'object' && t?._id === item.selectedTipShape) || 
+                        (typeof t === 'string' && t === item.selectedTipShape)
+                      );
+                      if (selectedTipShapeObj) {
+                        tipShapeName = typeof selectedTipShapeObj === 'object' && selectedTipShapeObj?.name 
+                          ? selectedTipShapeObj.name 
+                          : item.selectedTipShape;
+                      }
+                    }
+
+                    return (
+                      <div key={item.product.id || item.product._id} className="flex gap-3 items-start">
+                        <Image
+                          src={getProductImages(item.product)[0] || '/placeholder-product.jpg'}
+                          alt={getProductName(item.product)}
+                          width={64}
+                          height={64}
+                          className="w-16 h-16 object-cover rounded-md flex-shrink-0"
+                        />
+                        <div className="flex-1 min-w-0">
+                          <h4 className="text-sm font-medium line-clamp-2">
+                            {getProductName(item.product)}
+                          </h4>
+                          <div className="mt-1 space-y-1">
+                            {item.product.productCode && (
+                              <p className="text-xs text-muted-foreground">Product Code: {item.product.productCode}</p>
+                            )}
+                            {item.product.sku && (
+                              <p className="text-xs text-muted-foreground">SKU: {item.product.sku}</p>
+                            )}
+                            <p className="text-xs text-muted-foreground">Quantity: {item.quantity}</p>
+                            {(colorName || materialName || tipShapeName) && (
+                              <div className="text-xs text-muted-foreground space-y-1">
+                                {colorName && (
+                                  <div className="flex items-center gap-1.5">
+                                    <span>Color:</span>
+                                    {colorValue && (
+                                      <div 
+                                        className="w-3 h-3 rounded-full border border-border/50" 
+                                        style={{ backgroundColor: colorValue }}
+                                      />
+                                    )}
+                                    <span>{colorName}</span>
+                                  </div>
+                                )}
+                                {materialName && <p>Material: {materialName}</p>}
+                                {tipShapeName && <p>Tip Shape: {tipShapeName}</p>}
+                              </div>
+                            )}
+                          </div>
+                        </div>
                       </div>
-                      <span className="text-sm font-medium ml-2">
-                        ${(item.product.price * item.quantity).toFixed(2)}
-                      </span>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
 
                 <Separator />
 
-                {/* Totals */}
-                <div className="space-y-2 text-sm">
-                  <div className="flex justify-between">
-                    <span>Subtotal:</span>
-                    <span>${total.toFixed(2)}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Shipping:</span>
-                    <span className={shipping === 0 ? 'text-green-600' : ''}>
-                      {shipping === 0 ? 'Free' : `$${shipping.toFixed(2)}`}
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>{taxSettings?.taxLabel || 'Tax'}:</span>
-                    <span>${tax.toFixed(2)}</span>
-                  </div>
-                </div>
-
-                <Separator />
-
-                <div className="flex justify-between text-lg font-semibold">
-                  <span>Total:</span>
-                  <span className="price-display">${finalTotal.toFixed(2)}</span>
+                <div className="bg-muted/20 border border-border rounded-lg p-4">
+                  <p className="text-sm text-muted-foreground">
+                    Our team will review your quote request and contact you within 24-48 hours with pricing and availability information.
+                  </p>
                 </div>
 
                 {/* Security Info */}

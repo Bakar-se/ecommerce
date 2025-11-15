@@ -8,6 +8,29 @@ export const PRODUCT_QUERY = `*[_type == "product" && slug.current == $slug][0] 
   description,
   price,
   stock,
+  sku,
+  productCode,
+  variant->{
+    _id,
+    name
+  },
+  colors[]->{
+    _id,
+    name,
+    value
+  },
+  materials[]->{
+    _id,
+    name
+  },
+  tipShapes[]->{
+    _id,
+    name
+  },
+  code->{
+    _id,
+    value
+  },
   category->{
     _id,
     title,
@@ -534,8 +557,7 @@ export const FILTER_OPTIONS_QUERY = `{
     },
     "productCount": count(*[_type == "product" && subCategory._ref == ^._id])
   },
-  "materials": array::unique(*[_type == "product"].material),
-  "brands": array::unique(*[_type == "product"].brand),
+  "materials": array::unique(*[_type == "product"].materials[]->name),
   "priceRange": {
     "min": min(*[_type == "product"].price),
     "max": max(*[_type == "product"].price)

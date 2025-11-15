@@ -1,15 +1,16 @@
 'use client';
 
 import React from 'react';
-import { X, Plus, Minus, ShoppingBag } from 'lucide-react';
+import { X, ShoppingBag } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
 import { useCart } from '@/context/CartContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
 import Image from 'next/image';
-import { getProductName, getProductImages } from '@/lib/sanity/utils';
+import { getProductName, getProductImages, getBrandName } from '@/lib/sanity/utils';
 
 const CartDrawer = () => {
   const { items, total, itemCount, isOpen, setIsOpen, updateQuantity, removeFromCart } = useCart();
@@ -87,9 +88,9 @@ const CartDrawer = () => {
                 ) : (
                   <motion.div layout className="space-y-4">
                     <AnimatePresence>
-                      {items.map((item) => (
+                      {items.map((item, index) => (
                         <motion.div
-                          key={item.product.id || item.product._id}
+                          key={`${item.product.id || item.product._id}-${item.selectedColor || 'no-color'}-${item.selectedMaterial || 'no-material'}-${item.selectedTipShape || 'no-tipshape'}-${index}`}
                           variants={itemVariants}
                           initial="hidden"
                           animate="visible"
@@ -108,34 +109,82 @@ const CartDrawer = () => {
                             <h4 className="font-medium text-sm leading-tight mb-1">
                               {getProductName(item.product)}
                             </h4>
-                            <p className="text-xs text-muted-foreground mb-2">
-                              {item.product.brand || 'MedPro'}
-                            </p>
-                            <div className="flex items-center justify-between">
-                              <span className="price-display font-semibold text-sm">
-                                ${item.product.price.toFixed(2)}
-                              </span>
-                              <div className="flex items-center space-x-2">
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  className="w-6 h-6 p-0"
-                                  onClick={() => updateQuantity(item.product.id || item.product._id, item.quantity - 1)}
-                                >
-                                  <Minus className="w-3 h-3" />
-                                </Button>
-                                <span className="text-sm font-medium w-6 text-center">
-                                  {item.quantity}
-                                </span>
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  className="w-6 h-6 p-0"
-                                  onClick={() => updateQuantity(item.product.id || item.product._id, item.quantity + 1)}
-                                >
-                                  <Plus className="w-3 h-3" />
-                                </Button>
-                              </div>
+                            {item.product.productCode && (
+                              <p className="text-xs text-muted-foreground mb-1">Product Code: {item.product.productCode}</p>
+                            )}
+                            {item.product.sku && (
+                              <p className="text-xs text-muted-foreground mb-1">SKU: {item.product.sku}</p>
+                            )}
+                            {/* Product details: Color, Material, and Tip Shape */}
+                            <div className="flex flex-wrap gap-2 mb-2">
+                              {item.selectedColor && item.product.colors && (
+                                (() => {
+                                  const selectedColorObj = item.product.colors.find((c: any) => 
+                                    (typeof c === 'object' && c?._id === item.selectedColor) || 
+                                    (typeof c === 'string' && c === item.selectedColor)
+                                  );
+                                  const colorName = typeof selectedColorObj === 'object' && selectedColorObj?.name 
+                                    ? selectedColorObj.name 
+                                    : item.selectedColor;
+                                  const colorValue = typeof selectedColorObj === 'object' && selectedColorObj?.value 
+                                    ? selectedColorObj.value 
+                                    : '#000000';
+                                  return (
+                                    <div className="flex items-center gap-1.5">
+                                      <div 
+                                        className="w-3 h-3 rounded-full border border-border/50" 
+                                        style={{ backgroundColor: colorValue }}
+                                      />
+                                      <span className="text-xs text-muted-foreground">{colorName}</span>
+                                    </div>
+                                  );
+                                })()
+                              )}
+                              {item.selectedMaterial && item.product.materials && (
+                                (() => {
+                                  const selectedMaterialObj = item.product.materials.find((m: any) => 
+                                    (typeof m === 'object' && m?._id === item.selectedMaterial) || 
+                                    (typeof m === 'string' && m === item.selectedMaterial)
+                                  );
+                                  const materialName = typeof selectedMaterialObj === 'object' && selectedMaterialObj?.name 
+                                    ? selectedMaterialObj.name 
+                                    : item.selectedMaterial;
+                                  return (
+                                    <span className="text-xs text-muted-foreground px-2 py-0.5 bg-muted/50 rounded">
+                                      {materialName}
+                                    </span>
+                                  );
+                                })()
+                              )}
+                              {item.selectedTipShape && item.product.tipShapes && (
+                                (() => {
+                                  const selectedTipShapeObj = item.product.tipShapes.find((t: any) => 
+                                    (typeof t === 'object' && t?._id === item.selectedTipShape) || 
+                                    (typeof t === 'string' && t === item.selectedTipShape)
+                                  );
+                                  const tipShapeName = typeof selectedTipShapeObj === 'object' && selectedTipShapeObj?.name 
+                                    ? selectedTipShapeObj.name 
+                                    : item.selectedTipShape;
+                                  return (
+                                    <span className="text-xs text-muted-foreground px-2 py-0.5 bg-muted/50 rounded">
+                                      Tip: {tipShapeName}
+                                    </span>
+                                  );
+                                })()
+                              )}
+                            </div>
+                            <div className="flex items-center justify-end">
+                              <Input
+                                type="number"
+                                min="1"
+                                max="9999"
+                                value={item.quantity}
+                                onChange={(e) => {
+                                  const value = parseInt(e.target.value) || 1;
+                                  updateQuantity(item.product.id || item.product._id, Math.max(1, Math.min(9999, value)));
+                                }}
+                                className="w-16 h-8 text-center text-sm font-medium"
+                              />
                             </div>
                           </div>
                           <Button
@@ -156,12 +205,6 @@ const CartDrawer = () => {
               {/* Footer */}
               {items.length > 0 && (
                 <div className="p-6 border-t border-border space-y-4">
-                  <div className="flex items-center justify-between">
-                    <span className="font-semibold">Total:</span>
-                    <span className="text-xl font-bold price-display">
-                      ${total.toFixed(2)}
-                    </span>
-                  </div>
                   <div className="space-y-2">
                     <Link href="/cart" className="block">
                       <Button 

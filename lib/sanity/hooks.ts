@@ -208,6 +208,15 @@ export function useFilteredProducts(filters: {
               }
             }
           },
+          colors[]->{
+            _id,
+            name,
+            value
+          },
+          materials[]->{
+            _id,
+            name
+          },
           isFeatured,
           seo {
             title,
@@ -243,12 +252,18 @@ export function useFilteredProducts(filters: {
         
         // Materials filter
         if (filters.materials && filters.materials.length > 0) {
-          filteredResult = filteredResult.filter((product: any) =>
-            filters.materials!.includes(product.material)
-          );
+          filteredResult = filteredResult.filter((product: any) => {
+            if (!product.materials || !Array.isArray(product.materials)) return false;
+            const productMaterials = product.materials.map((m: any) => 
+              typeof m === 'object' && m?.name ? m.name : (typeof m === 'string' ? m : '')
+            ).filter(Boolean);
+            return filters.materials!.some(filterMaterial => 
+              productMaterials.includes(filterMaterial)
+            );
+          });
         }
         
-        // Brands filter
+        // Brands filter (legacy support - can be removed if not needed)
         if (filters.brands && filters.brands.length > 0) {
           filteredResult = filteredResult.filter((product: any) =>
             filters.brands!.includes(product.brand)

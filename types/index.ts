@@ -26,8 +26,7 @@ export interface Product {
     current: string;
   };
   description: any[]; // Sanity block content
-  price: number;
-  stock: number;
+  price?: number;
   category: {
     _id: string;
     title: string;
@@ -52,18 +51,43 @@ export interface Product {
   images: SanityImage[];
   isFeatured: boolean;
   seo?: SEO;
+  sku?: string;
+  productCode?: string;
+  variant?: {
+    _id: string;
+    name: string;
+  } | string;
+  colors?: Array<{
+    _id: string;
+    name: string;
+    value: string;
+  } | string>;
+  materials?: Array<{
+    _id: string;
+    name: string;
+  } | string>;
+  tipShapes?: Array<{
+    _id: string;
+    name: string;
+  } | string>;
+  // Legacy field for backward compatibility
+  brand?: {
+    _id: string;
+    name: string;
+  } | string;
+  code?: {
+    _id: string;
+    value: string;
+  } | string;
   // Legacy fields for backward compatibility
   id?: string;
   name?: string;
   originalPrice?: number;
-  inStock?: boolean;
-  stockCount?: number;
   rating?: number;
   reviewCount?: number;
   specifications?: { [key: string]: string };
   isOnSale?: boolean;
   tags?: string[];
-  brand?: string;
   material?: string;
 }
   
@@ -106,6 +130,9 @@ export interface Subcategory {
   export interface CartItem {
     product: Product;
     quantity: number;
+    selectedColor?: string | null;
+    selectedMaterial?: string | null;
+    selectedTipShape?: string | null;
   }
   
 export interface SortOption {

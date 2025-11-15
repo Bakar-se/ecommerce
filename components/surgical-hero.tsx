@@ -19,7 +19,7 @@ export function SurgicalHero({
   return (
     <section aria-labelledby="surgical-hero-title" className="relative">
       {/* Left / Right split - Added fixed heights: 96 on mobile, screen height on md and up */}
-      <div className="grid grid-cols-1 md:grid-cols-2 h-96 md:h-screen">
+      <div className="grid grid-cols-1 md:grid-cols-[1.3fr_1fr] h-96 md:h-[750px]">
         {/* Visual panel */}
         <div className="bg-secondary flex items-center justify-center overflow-hidden">
           <div className="relative w-full h-full">

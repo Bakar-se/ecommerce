@@ -11,7 +11,7 @@ interface CartState {
 }
 
 interface CartContextType extends CartState {
-  addToCart: (product: Product, quantity?: number) => void;
+  addToCart: (product: Product, quantity?: number, selectedColor?: string | null, selectedMaterial?: string | null, selectedTipShape?: string | null) => void;
   removeFromCart: (productId: string) => void;
   updateQuantity: (productId: string, quantity: number) => void;
   clearCart: () => void;
@@ -20,7 +20,7 @@ interface CartContextType extends CartState {
 }
 
 type CartAction =
-  | { type: 'ADD_TO_CART'; product: Product; quantity: number }
+  | { type: 'ADD_TO_CART'; product: Product; quantity: number; selectedColor?: string | null; selectedMaterial?: string | null; selectedTipShape?: string | null }
   | { type: 'REMOVE_FROM_CART'; productId: string }
   | { type: 'UPDATE_QUANTITY'; productId: string; quantity: number }
   | { type: 'CLEAR_CART' }
@@ -31,18 +31,27 @@ const CartContext = createContext<CartContextType | undefined>(undefined);
 const cartReducer = (state: CartState & { isOpen: boolean }, action: CartAction) => {
   switch (action.type) {
     case 'ADD_TO_CART': {
-      const existingItem = state.items.find(item => item.product.id === action.product.id);
+      // Check if item with same product, color, material, and tip shape already exists
+      const existingItem = state.items.find(item => 
+        item.product.id === action.product.id &&
+        item.selectedColor === action.selectedColor &&
+        item.selectedMaterial === action.selectedMaterial &&
+        item.selectedTipShape === action.selectedTipShape
+      );
       
       if (existingItem) {
         const updatedItems = state.items.map(item =>
-          item.product.id === action.product.id
+          item.product.id === action.product.id &&
+          item.selectedColor === action.selectedColor &&
+          item.selectedMaterial === action.selectedMaterial &&
+          item.selectedTipShape === action.selectedTipShape
             ? { ...item, quantity: item.quantity + action.quantity }
             : item
         );
-        
-        const total = updatedItems.reduce((sum, item) => sum + (item.product.price * item.quantity), 0);
+
+        const total = updatedItems.reduce((sum, item) => sum + ((item.product.price ?? 0) * item.quantity), 0);
         const itemCount = updatedItems.reduce((sum, item) => sum + item.quantity, 0);
-        
+
         return { 
           ...state, 
           items: updatedItems, 
@@ -50,8 +59,14 @@ const cartReducer = (state: CartState & { isOpen: boolean }, action: CartAction)
           itemCount
         };
       } else {
-        const newItems = [...state.items, { product: action.product, quantity: action.quantity }];
-        const total = newItems.reduce((sum, item) => sum + (item.product.price * item.quantity), 0);
+        const newItems = [...state.items, { 
+          product: action.product, 
+          quantity: action.quantity,
+          selectedColor: action.selectedColor,
+          selectedMaterial: action.selectedMaterial,
+          selectedTipShape: action.selectedTipShape
+        }];
+        const total = newItems.reduce((sum, item) => sum + ((item.product.price ?? 0) * item.quantity), 0);
         const itemCount = newItems.reduce((sum, item) => sum + item.quantity, 0);
         
         return { 
@@ -65,7 +80,7 @@ const cartReducer = (state: CartState & { isOpen: boolean }, action: CartAction)
     
     case 'REMOVE_FROM_CART': {
       const filteredItems = state.items.filter(item => item.product.id !== action.productId);
-      const total = filteredItems.reduce((sum, item) => sum + (item.product.price * item.quantity), 0);
+      const total = filteredItems.reduce((sum, item) => sum + ((item.product.price ?? 0) * item.quantity), 0);
       const itemCount = filteredItems.reduce((sum, item) => sum + item.quantity, 0);
       
       return { 
@@ -87,7 +102,7 @@ const cartReducer = (state: CartState & { isOpen: boolean }, action: CartAction)
           : item
       );
       
-      const total = updatedItems.reduce((sum, item) => sum + (item.product.price * item.quantity), 0);
+      const total = updatedItems.reduce((sum, item) => sum + ((item.product.price ?? 0) * item.quantity), 0);
       const itemCount = updatedItems.reduce((sum, item) => sum + item.quantity, 0);
       
       return { 
@@ -149,9 +164,10 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     }));
   }, [state.items, state.total, state.itemCount]);
 
-  const addToCart = (product: Product, quantity: number = 1) => {
-    dispatch({ type: 'ADD_TO_CART', product, quantity });
-    toast.success(`${product.name} added to cart`);
+  const addToCart = (product: Product, quantity: number = 1, selectedColor?: string | null, selectedMaterial?: string | null, selectedTipShape?: string | null) => {
+    dispatch({ type: 'ADD_TO_CART', product, quantity, selectedColor, selectedMaterial, selectedTipShape });
+    const productName = product.name || product.title || 'Product';
+    toast.success(`${quantity} ${productName}${quantity > 1 ? 's' : ''} added to cart`);
   };
 
   const removeFromCart = (productId: string) => {

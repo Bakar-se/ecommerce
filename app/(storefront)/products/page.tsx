@@ -8,7 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Grid, List, Filter } from 'lucide-react';
 import { useQueryState, parseAsString, parseAsInteger, parseAsArrayOf } from 'nuqs';
 import { useProducts } from '@/lib/sanity/hooks';
-import { transformProduct, getProductName, getProductDescription, isProductInStock } from '@/lib/sanity/utils';
+import { transformProduct, getProductName, getProductDescription } from '@/lib/sanity/utils';
 
 export default function ProductsPage() {
   const [viewMode, setViewMode] = useQueryState('view', parseAsString.withDefault('grid'));
@@ -52,7 +52,7 @@ export default function ProductsPage() {
 
     // Price range filter
     filtered = filtered.filter(product =>
-      product.price >= minPrice && product.price <= maxPrice
+      product.price && product.price >= minPrice && product.price <= maxPrice
     );
 
     // Materials filter
@@ -62,12 +62,7 @@ export default function ProductsPage() {
       );
     }
 
-    // Brands filter
-    if (brands.length > 0) {
-      filtered = filtered.filter(product =>
-        product.brand && brands.includes(product.brand)
-      );
-    }
+   
 
     // Categories filter
     if (categories.length > 0) {
@@ -95,10 +90,7 @@ export default function ProductsPage() {
       });
     }
 
-    // In stock filter
-    if (inStockOnly === 'true') {
-      filtered = filtered.filter(product => isProductInStock(product));
-    }
+    
 
     // Rating filter
     if (rating > 0) {
@@ -107,12 +99,8 @@ export default function ProductsPage() {
 
     // Sort products
     switch (sortBy) {
-      case 'price-low':
-        filtered.sort((a, b) => a.price - b.price);
-        break;
-      case 'price-high':
-        filtered.sort((a, b) => b.price - a.price);
-        break;
+      
+      
       case 'rating':
         filtered.sort((a, b) => (b.rating || 0) - (a.rating || 0));
         break;
@@ -237,7 +225,7 @@ export default function ProductsPage() {
         <>
           <div className={
             viewMode === 'grid'
-              ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6'
+              ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3  gap-4 sm:gap-6'
               : 'space-y-4'
           }>
             {currentProducts.map((product) => (

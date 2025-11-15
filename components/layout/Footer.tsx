@@ -75,19 +75,10 @@ const Footer = () => {
           {/* Logo and certification */}
           <div className="flex items-center gap-6">
             <div className="flex items-center space-x-3">
-            <Image src="/excurion.svg" alt="Logo" width={100} height={100} className='h-16 w-full object-cover' />
+            <Image src="/exsurion.svg" alt="Logo" width={100} height={100} className='h-16 w-full object-cover' />
             </div>
             {/* Certification badge placeholder */}
-            <div className="flex items-center gap-2 px-4 py-2 border border-gray-600 rounded-full">
-              <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center">
-                <span className="text-black text-xs font-bold">ISO</span>
-              </div>
-              <div className="text-xs">
-                <div>ISO 13485</div>
-                <div className="text-gray-400">Quality Management</div>
-                <div className="text-gray-400">CERTIFIED</div>
-              </div>
-            </div>
+            
           </div>
 
 

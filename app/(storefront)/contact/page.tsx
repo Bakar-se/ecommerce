@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Mail, Send, CheckCircle, Loader2, AlertCircle } from 'lucide-react';
 import Link from 'next/link';
+import axios from 'axios';
 
 export default function ContactPage() {
   const [formData, setFormData] = useState({
@@ -38,27 +39,23 @@ export default function ContactPage() {
     setErrorMessage('');
 
     try {
-      const response = await fetch('/api/contact', {
-        method: 'POST',
+      const response = await axios.post('/api/contact', formData, {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(formData),
       });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to send message');
-      }
 
       setSubmitStatus('success');
       setFormData({ fullName: '', email: '', message: '' });
     } catch (error) {
       setSubmitStatus('error');
-      setErrorMessage(
-        error instanceof Error ? error.message : 'Failed to send message. Please try again.'
-      );
+      if (axios.isAxiosError(error) && error.response?.data?.error) {
+        setErrorMessage(error.response.data.error);
+      } else {
+        setErrorMessage(
+          error instanceof Error ? error.message : 'Failed to send message. Please try again.'
+        );
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -299,8 +296,8 @@ export default function ContactPage() {
             >
               <Mail className="w-8 h-8 text-primary mx-auto mb-3" />
               <h3 className="font-semibold mb-2">Email Us</h3>
-              <p className="text-sm text-muted-foreground">
-                {process.env.NEXT_PUBLIC_CONTACT_EMAIL || 'contact@example.com'}
+              <p className="text-sm text-white">
+                {process.env.GMAIL_USER || 'exsurion.instruments@gmail.com'}
               </p>
             </motion.div>
             <motion.div
@@ -313,7 +310,7 @@ export default function ContactPage() {
                 <span className="text-primary font-bold">24/7</span>
               </div>
               <h3 className="font-semibold mb-2">Support</h3>
-              <p className="text-sm text-muted-foreground">
+              <p className="text-sm text-white">
                 We're here to help you anytime
               </p>
             </motion.div>
@@ -327,7 +324,7 @@ export default function ContactPage() {
                 <span className="text-primary font-bold">&lt;24h</span>
               </div>
               <h3 className="font-semibold mb-2">Response Time</h3>
-              <p className="text-sm text-muted-foreground">
+              <p className="text-sm text-white">
                 We typically respond within 24 hours
               </p>
             </motion.div>
