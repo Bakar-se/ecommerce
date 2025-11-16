@@ -80,7 +80,7 @@ export const AnimatedTestimonials = ({
                   className="absolute inset-0 origin-bottom"
                 >
                   <Image
-                    src={testimonial.src || "/excurion.svg"}
+                    src={testimonial.src || "/background.png"}
                     alt={testimonial.name}
                     width={500}
                     height={500}

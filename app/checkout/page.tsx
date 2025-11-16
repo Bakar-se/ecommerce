@@ -365,7 +365,7 @@ const CheckoutPage = () => {
                     return (
                       <div key={item.product.id || item.product._id} className="flex gap-3 items-start">
                         <Image
-                          src={getProductImages(item.product)[0] || '/placeholder-product.jpg'}
+                          src={getProductImages(item.product)[0] || '/background.png'}
                           alt={getProductName(item.product)}
                           width={64}
                           height={64}

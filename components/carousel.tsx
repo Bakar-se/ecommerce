@@ -93,7 +93,7 @@ export function InfiniteCarousel() {
         {duplicatedImages.map((image, index) => (
           <div key={index} className="flex-shrink-0 w-90 h-[390px] rounded-2xl overflow-hidden bg-muted">
             <Image
-              src={image.src || "/placeholder.svg"}
+              src={image.src || "/background.png"}
               alt={image.alt}
               width={360}
               height={320}

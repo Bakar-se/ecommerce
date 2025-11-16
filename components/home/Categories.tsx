@@ -80,7 +80,7 @@ export function CategorySection() {
                 const src = typeof category.image === "string" ? category.image : getImageUrl(category.image)
                 return (
                   <Image
-                    src={src || "/placeholder.svg"}
+                    src={src || "/background.png"}
                     alt={category.title || category.name || "Category"}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                     width={400}

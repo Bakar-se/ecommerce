@@ -64,7 +64,7 @@ const AboutPage = () => {
       <section className="relative min-h-[80vh] flex items-center justify-center overflow-hidden">
         {/* Background Image */}
         <Image
-          src="/surgical-instruments-precision-dental-tools.jpg"
+          src={"/surgical-instruments-precision-dental-tools.jpg"}
           alt="Precision dental instruments"
           fill
           className="object-cover"
@@ -218,7 +218,7 @@ const AboutPage = () => {
                 variants={fadeInScale}
                 whileHover={{ scale: 1.02 }}
               >
-                <Image src={leader.image || "/placeholder.svg"} alt={leader.name} fill className="object-cover"  />
+                <Image src={leader.image || "/background.png"} alt={leader.name} fill className="object-cover"  />
 
                 <motion.div
                   className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent flex flex-col justify-end p-6"

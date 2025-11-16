@@ -85,7 +85,7 @@ const CartPage = () => {
                   >
                     <div className="flex flex-col md:flex-row md:items-center space-y-4 md:space-y-0 md:space-x-6">
                       <Image
-                        src={getProductImages(item.product)[0] || '/placeholder-product.jpg'}
+                        src={getProductImages(item.product)[0] || '/background.png'}
                         alt={getProductName(item.product)}
                         width={96}
                         height={96}

@@ -65,7 +65,7 @@ export function TrustedBySection() {
                 key={`${company.name}-${index}`}
                 className="flex-shrink-0 grayscale opacity-60 hover:grayscale-0 hover:opacity-100 transition-all duration-300"
               >
-                <Image src={company.logo || "/placeholder.svg"} alt={`${company.name} logo`} className="h-12 w-auto" width={100} height={100} />
+                <Image src={company.logo || "/background.png"} alt={`${company.name} logo`} className="h-12 w-auto" width={100} height={100} />
               </div>
             ))}
           </motion.div>

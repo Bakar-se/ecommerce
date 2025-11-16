@@ -99,7 +99,7 @@ const CartDrawer = () => {
                           className="flex space-x-4 bg-muted/20 p-4 rounded-lg"
                         >
                           <Image
-                            src={getProductImages(item.product)[0] || '/placeholder-product.jpg'}
+                            src={getProductImages(item.product)[0] || '/background.png'}
                             alt={getProductName(item.product)}
                             width={64}
                             height={64}

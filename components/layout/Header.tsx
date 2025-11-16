@@ -73,7 +73,7 @@ const Header = () => {
           <div className="flex items-center justify-between py-4">
             {/* Logo */}
             <Link href="/" className="flex items-center space-x-2 cursor-pointer">
-              <Image src="/exsurion.svg" alt="Logo" width={100} height={100} className='h-16 w-full object-cover' />
+              <Image src="/exsurion-logo.svg" alt="Logo" width={100} height={100} className='h-16 w-full object-cover' />
             </Link>
 
             {/* Desktop Navigation */}

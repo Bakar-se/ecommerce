@@ -25,7 +25,7 @@ export function SurgicalHero({
           <div className="relative w-full h-full">
             {/* Product imagery */}
             <Image
-              src={imageSrc || "/instrument.png"}
+              src={imageSrc || "/background.png"}
               alt="Surgical instruments hero"
               className="block w-full h-full object-cover md:object-contain md:pt-16"
               width={500}

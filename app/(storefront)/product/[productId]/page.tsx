@@ -386,7 +386,7 @@ export default function ProductDetailPage() {
                   transition={{ duration: 0.3 }}
                 >
                   <Image
-                    src={productImages[selectedImage] || '/placeholder-product.jpg'}
+                    src={productImages[selectedImage] || '/background.png'}
                     alt={`${productName} - Image ${selectedImage + 1}`}
                     fill
                     className="object-cover transition-transform duration-300"
@@ -530,7 +530,7 @@ export default function ProductDetailPage() {
                   >
                     <div className="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity z-10" />
                     <Image
-                      src={image}
+                      src={image || '/background.png'}
                       alt={`${productName} ${index + 1}`}
                       fill
                       className="object-cover transition-transform duration-300 group-hover:scale-110"

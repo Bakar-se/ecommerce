@@ -207,7 +207,7 @@ const TeamsPage = (props: Props) => {
                     transition={{ duration: 0.3 }}
                   >
                     <Image
-                      src={teamMembers[currentIndex].image || "/placeholder.svg"}
+                      src={teamMembers[currentIndex].image || "/background.png"}
                       alt={teamMembers[currentIndex].name}
                       className="w-full h-full object-cover"
                       width={1000}
@@ -344,7 +344,7 @@ const TeamsPage = (props: Props) => {
                   {/* Image Container with Overlay */}
                   <div className="relative h-64 overflow-hidden bg-gradient-to-br from-accent/10 to-primary/10">
                     <Image
-                      src={member.image || "/placeholder.svg"}
+                      src={member.image || "/background.png"}
                       alt={member.name}
                       className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                       width={1000}

@@ -258,7 +258,7 @@ const DeliveryPage = () => {
                     transition={{ duration: 0.3 }}
                   >
                     <Image
-                      src={teamMembers[currentIndex].image || "/placeholder.svg"}
+                      src={teamMembers[currentIndex].image || "/background.png"}
                       alt={teamMembers[currentIndex].name}
                       className="w-full h-full object-cover"
                       width={1000}
