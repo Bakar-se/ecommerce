@@ -1,10 +1,9 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Slider } from '@/components/ui/slider';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
@@ -12,7 +11,6 @@ import { X, Filter, RotateCcw } from 'lucide-react';
 import { useQueryState, parseAsArrayOf, parseAsString, parseAsInteger } from 'nuqs';
 import { useCategories, useProducts } from '@/lib/sanity/hooks';
 import { transformCategory, getCategoryName, getSubcategoryName, transformProduct } from '@/lib/sanity/utils';
-import { SurgicalHero } from '@/components/surgical-hero';
 import HeroCarousel from '@/components/home/HeroCarousel';
 // Sort options
 const sortOptions = [
@@ -28,7 +26,7 @@ interface ProductsLayoutProps {
   children: React.ReactNode;
 }
 
-export default function ProductsLayout({ children }: ProductsLayoutProps) {
+function ProductsLayoutContent({ children }: ProductsLayoutProps) {
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [categorySearch, setCategorySearch] = useState('');
   
@@ -73,7 +71,7 @@ export default function ProductsLayout({ children }: ProductsLayoutProps) {
     if (!productsLoading && maxProductPrice > 0 && (maxPrice === 0 || maxPrice === 1000)) {
       setMaxPrice(maxProductPrice);
     }
-  }, [productsLoading, maxProductPrice, maxPrice]);
+  }, [productsLoading, maxProductPrice, maxPrice, setMaxPrice]);
   
   // Price range options
   const priceRangeOptions = { min: 0, max: maxProductPrice };
@@ -148,17 +146,6 @@ export default function ProductsLayout({ children }: ProductsLayoutProps) {
           {/* Sidebar - Desktop */}
           <div className="hidden lg:block w-72 xl:w-80 flex-shrink-0">
             <div className="sticky top-24 space-y-4 xl:space-y-6">
-              {/* Search */}
-              <div className="space-y-2">
-                <Label htmlFor="search">Search Products</Label>
-                <Input
-                  id="search"
-                  placeholder="Search surgical instruments..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                />
-              </div>
-
               {/* Sort */}
               {/* <div className="space-y-2">
                 <Label htmlFor="sort">Sort by</Label>
@@ -321,17 +308,6 @@ export default function ProductsLayout({ children }: ProductsLayoutProps) {
               </div>
 
               <div className="space-y-6">
-                {/* Search */}
-                <div className="space-y-2">
-                  <Label htmlFor="mobile-search">Search Products</Label>
-                  <Input
-                    id="mobile-search"
-                    placeholder="Search surgical instruments..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                  />
-                </div>
-
                 {/* Sort */}
                 <div className="space-y-2">
                   <Label htmlFor="mobile-sort">Sort by</Label>
@@ -492,5 +468,29 @@ export default function ProductsLayout({ children }: ProductsLayoutProps) {
       </div>
     </section>
     </div>
+  );
+}
+
+export default function ProductsLayout({ children }: ProductsLayoutProps) {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-background">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 min-h-screen">
+          <div className="flex flex-col lg:flex-row gap-6">
+            <div className="hidden lg:block w-72 xl:w-80 flex-shrink-0">
+              <div className="sticky top-24 space-y-4 xl:space-y-6">
+                <div className="h-10 w-full bg-muted animate-pulse rounded" />
+                <div className="h-64 bg-muted animate-pulse rounded" />
+              </div>
+            </div>
+            <div className="flex-1 min-w-0 lg:ml-0">
+              {children}
+            </div>
+          </div>
+        </div>
+      </div>
+    }>
+      <ProductsLayoutContent>{children}</ProductsLayoutContent>
+    </Suspense>
   );
 }

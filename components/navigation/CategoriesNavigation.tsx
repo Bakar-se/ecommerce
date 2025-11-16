@@ -30,8 +30,9 @@ const CategoriesNavigation = () => {
   const checkScrollButtons = () => {
     if (scrollContainerRef.current) {
       const { scrollLeft, scrollWidth, clientWidth } = scrollContainerRef.current;
-      setCanScrollLeft(scrollLeft > 0);
-      setCanScrollRight(scrollLeft < scrollWidth - clientWidth - 1);
+      const hasScroll = scrollWidth > clientWidth;
+      setCanScrollLeft(hasScroll && scrollLeft > 0);
+      setCanScrollRight(hasScroll && scrollLeft < scrollWidth - clientWidth - 1);
     }
   };
 
@@ -79,16 +80,23 @@ const CategoriesNavigation = () => {
   useEffect(() => {
     const container = scrollContainerRef.current;
     if (container) {
-      checkScrollButtons();
+      // Check scroll buttons on mount and when categories change
+      const checkScroll = () => {
+        setTimeout(() => {
+          checkScrollButtons();
+        }, 100);
+      };
+      
+      checkScroll();
       container.addEventListener('scroll', checkScrollButtons);
-      window.addEventListener('resize', checkScrollButtons);
+      window.addEventListener('resize', checkScroll);
       
       return () => {
         container.removeEventListener('scroll', checkScrollButtons);
-        window.removeEventListener('resize', checkScrollButtons);
+        window.removeEventListener('resize', checkScroll);
       };
     }
-  }, []);
+  }, [categories, transformedCategories.length]);
 
   useEffect(() => {
     return () => {
@@ -107,18 +115,21 @@ const CategoriesNavigation = () => {
             variant="ghost"
             size="sm"
             onClick={scrollLeft}
-            className={`absolute left-0 z-10 h-8 w-8 p-0 bg-background/80 backdrop-blur-sm ${
+            className={`absolute left-0 z-20 h-full w-10 p-0 bg-gradient-to-r from-background via-background/95 to-transparent hover:from-background hover:via-background/98 ${
               canScrollLeft ? 'opacity-100' : 'opacity-0 pointer-events-none'
-            } transition-opacity`}
+            } transition-opacity flex items-center justify-center`}
           >
-            <ChevronLeft className="w-4 h-4" />
+            <ChevronLeft className="w-5 h-5" />
           </Button>
 
           {/* Categories container */}
           <div
             ref={scrollContainerRef}
-            className="flex-1 overflow-x-auto overflow-y-visible scrollbar-hide mx-8"
-            style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+            className="flex-1 overflow-x-auto overflow-y-visible mx-10 hide-scrollbar"
+            style={{ 
+              WebkitOverflowScrolling: 'touch'
+            }}
+            onScroll={checkScrollButtons}
           >
             <div className="flex items-center space-x-8 min-w-max px-4">
               {loading ? (
@@ -184,11 +195,11 @@ const CategoriesNavigation = () => {
             variant="ghost"
             size="sm"
             onClick={scrollRight}
-            className={`absolute right-0 z-10 h-8 w-8 p-0 bg-background/80 backdrop-blur-sm ${
+            className={`absolute right-0 z-20 h-full w-10 p-0 bg-gradient-to-l from-background via-background/95 to-transparent hover:from-background hover:via-background/98 ${
               canScrollRight ? 'opacity-100' : 'opacity-0 pointer-events-none'
-            } transition-opacity`}
+            } transition-opacity flex items-center justify-center`}
           >
-            <ChevronRight className="w-4 h-4" />
+            <ChevronRight className="w-5 h-5" />
           </Button>
         </div>
       </div>

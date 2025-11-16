@@ -39,7 +39,7 @@ export default function ContactPage() {
     setErrorMessage('');
 
     try {
-      const response = await axios.post('/api/contact', formData, {
+      void await axios.post('/api/contact', formData, {
         headers: {
           'Content-Type': 'application/json',
         },
@@ -138,8 +138,8 @@ export default function ContactPage() {
               animate={{ opacity: 1 }}
               transition={{ delay: 0.5, duration: 0.5 }}
             >
-              Have a question or want to work with us? We'd love to hear from you.
-              Send us a message and we'll respond as soon as possible.
+              Have a question or want to work with us? We&apos;d love to hear from you.
+              Send us a message and we&apos;ll respond as soon as possible.
             </motion.p>
           </motion.div>
 
@@ -165,7 +165,7 @@ export default function ContactPage() {
                 </motion.div>
                 <h2 className="text-2xl font-bold mb-4">Message Sent Successfully!</h2>
                 <p className="text-muted-foreground mb-6">
-                  Thank you for contacting us. We've received your message and will get back to you soon.
+                  Thank you for contacting us. We&apos;ve received your message and will get back to you soon.
                   A confirmation email has been sent to your inbox.
                 </p>
                 <Button
@@ -311,7 +311,7 @@ export default function ContactPage() {
               </div>
               <h3 className="font-semibold mb-2">Support</h3>
               <p className="text-sm text-white">
-                We're here to help you anytime
+                We&apos;re here to help you anytime
               </p>
             </motion.div>
             <motion.div

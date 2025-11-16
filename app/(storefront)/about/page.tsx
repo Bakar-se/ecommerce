@@ -3,7 +3,6 @@
 import Image from "next/image"
 import { motion } from "framer-motion"
 
-type Props = {}
 
 const leaders = [
   {
@@ -38,11 +37,7 @@ const leaders = [
   },
 ]
 
-const fadeInUp = {
-  initial: { opacity: 0, y: 20 },
-  animate: { opacity: 1, y: 0 },
-  transition: { duration: 0.6 },
-}
+
 
 const staggerContainer = {
   animate: {
@@ -59,19 +54,11 @@ const fadeInScale = {
   transition: { duration: 0.6 },
 }
 
-const slideInLeft = {
-  initial: { opacity: 0, x: -30 },
-  animate: { opacity: 1, x: 0 },
-  transition: { duration: 0.6 },
-}
 
-const slideInRight = {
-  initial: { opacity: 0, x: 30 },
-  animate: { opacity: 1, x: 0 },
-  transition: { duration: 0.6 },
-}
 
-const AboutPage = (props: Props) => {
+
+
+const AboutPage = () => {
   return (
     <main>
       <section className="relative min-h-[80vh] flex items-center justify-center overflow-hidden">

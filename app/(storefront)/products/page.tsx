@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, { useMemo, Suspense } from 'react';
 import ProductCard from '@/components/products/ProductCard';
 import { Product } from '@/types';
 import { Button } from '@/components/ui/button';
@@ -10,7 +10,7 @@ import { useQueryState, parseAsString, parseAsInteger, parseAsArrayOf } from 'nu
 import { useProducts } from '@/lib/sanity/hooks';
 import { transformProduct, getProductName, getProductDescription } from '@/lib/sanity/utils';
 
-export default function ProductsPage() {
+function ProductsPageContent() {
   const [viewMode, setViewMode] = useQueryState('view', parseAsString.withDefault('grid'));
   const [currentPage, setCurrentPage] = useQueryState('page', parseAsInteger.withDefault(1));
   const productsPerPage = 12;
@@ -305,5 +305,38 @@ export default function ProductsPage() {
         </div>
       )}
     </div>
+  );
+}
+
+export default function ProductsPage() {
+  return (
+    <Suspense fallback={
+      <div className="space-y-6">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div className="flex-1 min-w-0">
+            <div className="h-8 w-64 bg-muted animate-pulse rounded mb-2" />
+            <div className="h-4 w-48 bg-muted animate-pulse rounded" />
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="h-6 w-20 bg-muted animate-pulse rounded" />
+            <div className="h-8 w-16 bg-muted animate-pulse rounded" />
+          </div>
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
+          {[...Array(8)].map((_, i) => (
+            <div key={i} className="bg-card border border-border rounded-lg overflow-hidden">
+              <div className="aspect-square bg-muted animate-pulse" />
+              <div className="p-4 space-y-2">
+                <div className="h-4 w-3/4 bg-muted animate-pulse rounded" />
+                <div className="h-3 w-1/2 bg-muted animate-pulse rounded" />
+                <div className="h-4 w-1/3 bg-muted animate-pulse rounded" />
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    }>
+      <ProductsPageContent />
+    </Suspense>
   );
 }

@@ -9,18 +9,12 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from '@/components/ui/tooltip';
 import { 
-  Star, 
   ShoppingCart, 
   Heart, 
   ArrowLeft, 
-  Share2, 
-  Truck, 
-  Shield, 
-  RotateCcw,
   CheckCircle,
   ChevronLeft,
   ChevronRight
@@ -209,7 +203,7 @@ export default function ProductDetailPage() {
             animate={{ opacity: 1 }}
             transition={{ delay: 0.2, duration: 0.3 }}
           >
-            The product you're looking for doesn't exist.
+            The product you&apos;re looking for doesn&apos;t exist.
           </motion.p>
           <motion.div
             initial={{ opacity: 0, y: 10 }}
@@ -293,8 +287,47 @@ export default function ProductDetailPage() {
     },
   };
 
+  // Generate structured data for SEO
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://exsurion.com";
+  const productUrl = `${baseUrl}/product/${params.productId}`;
+  
+  const structuredData = product ? {
+    "@context": "https://schema.org/",
+    "@type": "Product",
+    "name": productName,
+    "description": productDescription,
+    "image": productImages.length > 0 ? productImages : [],
+    "sku": product.sku || product.productCode || "",
+    "mpn": product.productCode || product.sku || "",
+    "brand": {
+      "@type": "Brand",
+      "name": "Exsurion"
+    },
+    "offers": {
+      "@type": "Offer",
+      "url": productUrl,
+      "priceCurrency": "USD",
+      "availability": "https://schema.org/InStock",
+      "priceValidUntil": new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+      "itemCondition": "https://schema.org/NewCondition"
+    },
+    "category": product.category?.title || "",
+    "manufacturer": {
+      "@type": "Organization",
+      "name": "Exsurion"
+    }
+  } : null;
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20">
+      {/* Structured Data for SEO */}
+      {structuredData && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+        />
+      )}
+      
       {/* Decorative background elements */}
       <div className="fixed inset-0 -z-10 overflow-hidden pointer-events-none">
         <div className="absolute top-0 right-0 w-96 h-96 bg-primary/5 rounded-full blur-3xl" />

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, Suspense } from 'react';
 import Link from 'next/link';
 import { Search, ShoppingCart, Menu, X, Grid3X3 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -11,12 +11,45 @@ import CartDrawer from '@/components/cart/CartDrawer';
 import CategoriesSheet from '@/components/navigation/CategoriesSheet';
 import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
+import { useQueryState, parseAsString } from 'nuqs';
+
+function HeaderSearch() {
+  const [searchQuery, setSearchQuery] = useQueryState('search', parseAsString.withDefault(''));
+
+  return (
+    <div className="relative hidden md:flex items-center">
+      <Search className="absolute left-3 w-4 h-4 text-muted-foreground" />
+      <Input
+        type="text"
+        placeholder="Search products..."
+        value={searchQuery}
+        onChange={(e) => setSearchQuery(e.target.value)}
+        className="pl-9 pr-4 w-64 lg:w-80"
+      />
+    </div>
+  );
+}
+
+function MobileSearch() {
+  const [searchQuery, setSearchQuery] = useQueryState('search', parseAsString.withDefault(''));
+
+  return (
+    <div className="relative flex items-center">
+      <Search className="absolute left-3 w-4 h-4 text-muted-foreground" />
+      <Input
+        type="text"
+        placeholder="Search products..."
+        value={searchQuery}
+        onChange={(e) => setSearchQuery(e.target.value)}
+        className="pl-9 pr-4 w-full"
+      />
+    </div>
+  );
+}
 
 const Header = () => {
   const { itemCount, setIsOpen: setCartOpen } = useCart();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isSearchFocused, setIsSearchFocused] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
   const [isCategoriesOpen, setIsCategoriesOpen] = useState(false);
 
   return (
@@ -62,6 +95,11 @@ const Header = () => {
               </Link>
             </nav>
 
+            {/* Search - Desktop */}
+            <Suspense fallback={<div className="hidden md:block w-64 lg:w-80" />}>
+              <HeaderSearch />
+            </Suspense>
+
             {/* Right side actions */}
             <div className="flex items-center space-x-4">
               {/* Categories button (mobile only) */}
@@ -74,10 +112,7 @@ const Header = () => {
                 <Grid3X3 className="w-5 h-5" />
               </Button>
 
-              {/* Mobile search */}
-              <Button variant="ghost" size="sm" className="md:hidden">
-                <Search className="w-5 h-5" />
-              </Button>
+              {/* Mobile search - will be shown in mobile menu */}
 
               {/* Cart */}
               {/* <Button
@@ -116,6 +151,12 @@ const Header = () => {
                 transition={{ duration: 0.3 }}
                 className="lg:hidden overflow-hidden border-t border-border"
               >
+                {/* Mobile Search */}
+                <div className="px-4 py-2 border-b border-border">
+                  <Suspense fallback={<div className="h-10 w-full bg-muted animate-pulse rounded" />}>
+                    <MobileSearch />
+                  </Suspense>
+                </div>
                 <nav className="flex flex-col py-4 space-y-4">
                   <Link 
                     href="/about" 

@@ -386,10 +386,12 @@ const DeliveryPage = () => {
             viewport={{ once: true }}
           >
             <div className="rounded-l-2xl overflow-hidden border border-accent/20 h-96 md:h-full min-h-96">
-              <img
+              <Image
                 src="/calculator-pricing-cost-analysis-financial-plannin.jpg"
                 alt="Shipping cost calculation"
                 className="w-full h-full object-cover"
+                width={1000}
+                height={1000}
               />
             </div>
 
@@ -486,7 +488,7 @@ const DeliveryPage = () => {
             </motion.div>
 
             <div className="rounded-r-2xl overflow-hidden border border-accent/20 h-96 md:h-full min-h-96 order-1 md:order-2">
-              <img src="/medical-grade-protective-packaging-sterile-instrum.jpg" alt="Protective packaging" className="w-full h-full object-cover" />
+              <Image src="/medical-grade-protective-packaging-sterile-instrum.jpg" alt="Protective packaging" className="w-full h-full object-cover" width={1000} height={1000} />
             </div>
           </motion.div>
         </div>
@@ -503,7 +505,7 @@ const DeliveryPage = () => {
             viewport={{ once: true }}
           >
             <div className="rounded-l-2xl overflow-hidden border border-accent/20 h-96 md:h-full min-h-96">
-              <img src="/real-time-tracking-gps-location-monitoring-custome.jpg" alt="Real-time tracking" className="w-full h-full object-cover" />
+              <Image src="/real-time-tracking-gps-location-monitoring-custome.jpg" alt="Real-time tracking" className="w-full h-full object-cover" width={1000} height={1000} />
             </div>
 
             <motion.div
@@ -513,7 +515,7 @@ const DeliveryPage = () => {
               <h2 className="text-3xl font-bold text-foreground mb-6">Tracking & Support</h2>
               <p className="text-foreground/70 mb-6">
                 Once your order is shipped, you will receive a tracking number via email or SMS to monitor delivery
-                through the courier's website.
+                through the courier&apos;s website.
               </p>
               <motion.div
                 className="space-y-3"
@@ -581,7 +583,7 @@ const DeliveryPage = () => {
             </motion.div>
 
             <div className="rounded-r-2xl overflow-hidden border border-accent/20 h-96 md:h-full min-h-96 order-1 md:order-2">
-              <img src="/customs-border-inspection-international-regulation.jpg" alt="Customs and duties" className="w-full h-full object-cover" />
+              <Image src="/customs-border-inspection-international-regulation.jpg" alt="Customs and duties" className="w-full h-full object-cover" width={1000} height={1000} />
             </div>
           </motion.div>
         </div>
@@ -598,7 +600,7 @@ const DeliveryPage = () => {
             viewport={{ once: true }}
           >
             <div className="rounded-l-2xl overflow-hidden border border-accent/20 h-96 md:h-full min-h-96">
-              <img src="/address-verification-accuracy-form-data-entry-prec.jpg" alt="Shipping accuracy" className="w-full h-full object-cover" />
+                <Image src="/address-verification-accuracy-form-data-entry-prec.jpg" alt="Shipping accuracy" className="w-full h-full object-cover" width={1000} height={1000} />
             </div>
 
             <motion.div
@@ -626,7 +628,7 @@ const DeliveryPage = () => {
                 </motion.li>
                 <motion.li className="flex gap-3" variants={itemVariants}>
                   <span className="text-accent font-bold">⚠</span>
-                  <span>Changes cannot be guaranteed once with courier</span>
+                  <span>Changes cannot be guaranteed once with courier&apos;s</span>
                 </motion.li>
               </motion.ul>
             </motion.div>

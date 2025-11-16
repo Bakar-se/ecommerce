@@ -2,7 +2,6 @@
 import { motion } from "framer-motion"
 import Image from "next/image"
 
-type Props = {}
 
 const benefits = [
   {
@@ -78,14 +77,7 @@ const containerVariants = {
   },
 }
 
-const itemVariants = {
-  hidden: { opacity: 0, y: 20 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.6, ease: "easeOut" },
-  },
-}
+
 
 const CardVariants = {
   hidden: { opacity: 0, y: 30 },
@@ -101,7 +93,7 @@ const CardVariants = {
   },
 }
 
-const CareerPage = (props: Props) => {
+const CareerPage = () => {
   return (
     <main>
       {/* Hero Section */}
@@ -187,7 +179,7 @@ const CareerPage = (props: Props) => {
             whileInView="visible"
             viewport={{ once: true }}
           >
-            {benefits.map((benefit, index) => (
+            {benefits.map((benefit) => (
               <motion.div key={benefit.title} variants={CardVariants} whileHover="hover" className="group relative">
                 <div className="absolute inset-0 bg-gradient-to-r from-accent/10 to-transparent rounded-2xl blur-xl group-hover:blur-2xl transition-all opacity-0 group-hover:opacity-100" />
                 <div className="relative p-8 bg-card rounded-2xl border border-border/50 hover:border-accent/50 transition-all h-full flex flex-col">
@@ -231,7 +223,7 @@ const CareerPage = (props: Props) => {
             whileInView="visible"
             viewport={{ once: true }}
           >
-            {opportunities.map((opp, index) => (
+            {opportunities.map((opp) => (
               <motion.div key={opp.category} variants={CardVariants} whileHover="hover" className="group relative">
                 <div className="absolute inset-0 bg-gradient-to-r from-primary/10 to-accent/10 rounded-2xl blur-xl group-hover:blur-2xl transition-all opacity-0 group-hover:opacity-100" />
                 <div className="relative bg-card rounded-2xl border border-border/50 hover:border-accent/50 transition-all overflow-hidden h-full flex flex-col">

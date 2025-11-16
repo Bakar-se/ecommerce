@@ -1,5 +1,4 @@
 
-import FeaturedProducts from "@/components/home/FeaturedProducts";
 import { HeroSection } from "@/components/home/Hero";
 import { CategorySection } from "@/components/home/Categories";
 import { TestimonialsSection } from "@/components/testimonials-section";
